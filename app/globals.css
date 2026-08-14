@@ -1,0 +1,230 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Charte extraite de la capture de l'application.
+ *
+ * Base neutre (blanc + gris froids), bleu marine pour l'action principale, bleu
+ * vif pour les contrôles interactifs. TOUTE la charte se règle ici : aucun
+ * composant ne code une couleur en dur, donc un changement de direction
+ * artistique se fait dans ce seul fichier.
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 33% 11%;
+
+    /* Fonds de section. La sidebar est en `background`, séparée par une bordure. */
+    --surface: 220 20% 97%;
+    --surface-strong: 220 16% 94%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 33% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 33% 11%;
+
+    /* Bleu marine : l'action principale et une seule par écran. */
+    --primary: 224 64% 33%;
+    --primary-hover: 224 64% 27%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Bleu vif : interrupteurs, cases à cocher, focus, états actifs. */
+    --interactive: 221 83% 53%;
+    --interactive-hover: 221 83% 46%;
+    --interactive-foreground: 0 0% 100%;
+    --interactive-soft: 214 100% 97%;
+
+    --secondary: 220 18% 96%;
+    --secondary-foreground: 222 25% 22%;
+
+    --muted: 220 20% 97%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 214 100% 97%;
+    --accent-foreground: 224 64% 33%;
+
+    /* Vert de la marque (marque de l'en-tête de facture). */
+    --brand: 158 64% 22%;
+    --brand-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 16% 91%;
+    --input: 220 16% 88%;
+    --ring: 221 83% 53%;
+
+    --status-draft: 220 9% 46%;
+    --status-draft-bg: 220 20% 96%;
+    --status-sent: 221 83% 53%;
+    --status-sent-bg: 214 100% 97%;
+    --status-partial: 32 94% 44%;
+    --status-partial-bg: 45 100% 96%;
+    --status-paid: 158 64% 30%;
+    --status-paid-bg: 152 62% 96%;
+    --status-overdue: 0 72% 51%;
+    --status-overdue-bg: 0 100% 97%;
+    --status-cancelled: 220 9% 58%;
+    --status-cancelled-bg: 220 16% 96%;
+
+    /**
+     * Séries de graphique — #2563EB / #CE6A14.
+     * Validé par scripts/validate_palette.js en mode clair : ΔE 31,5 (protanopie),
+     * 28,5 (tritanopie), 36,6 (vision normale), contraste ≥ 3:1 sur blanc.
+     * Ne pas remplacer sans relancer le validateur.
+     */
+    --chart-1: 221 83% 53%;
+    --chart-2: 28 82% 44%;
+
+    --radius: 0.75rem;
+
+    --shadow-card: 0 1px 2px 0 hsl(222 24% 12% / 0.04), 0 1px 3px 0 hsl(222 24% 12% / 0.04);
+    --shadow-raised: 0 4px 8px -2px hsl(222 24% 12% / 0.08), 0 16px 32px -12px hsl(222 24% 12% / 0.16);
+  }
+
+  /* Le mode sombre est prévu par le design (interrupteur en pied de sidebar). */
+  .dark {
+    --background: 224 24% 9%;
+    --foreground: 220 20% 96%;
+
+    --surface: 224 22% 13%;
+    --surface-strong: 224 20% 17%;
+
+    --card: 224 22% 12%;
+    --card-foreground: 220 20% 96%;
+
+    --popover: 224 22% 14%;
+    --popover-foreground: 220 20% 96%;
+
+    /* En sombre, le marine disparaîtrait sur le fond : on éclaircit le bleu. */
+    --primary: 221 83% 60%;
+    --primary-hover: 221 83% 66%;
+    --primary-foreground: 224 45% 10%;
+
+    --interactive: 217 91% 62%;
+    --interactive-hover: 217 91% 68%;
+    --interactive-foreground: 224 45% 10%;
+    --interactive-soft: 224 40% 20%;
+
+    --secondary: 224 20% 18%;
+    --secondary-foreground: 220 18% 90%;
+
+    --muted: 224 20% 16%;
+    --muted-foreground: 220 12% 65%;
+
+    --accent: 224 40% 20%;
+    --accent-foreground: 214 96% 82%;
+
+    --brand: 158 50% 45%;
+    --brand-foreground: 224 45% 10%;
+
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 224 45% 10%;
+
+    --border: 224 18% 22%;
+    --input: 224 18% 26%;
+    --ring: 217 91% 62%;
+
+    --status-draft: 220 12% 68%;
+    --status-draft-bg: 224 20% 18%;
+    --status-sent: 217 91% 70%;
+    --status-sent-bg: 224 45% 22%;
+    --status-partial: 38 92% 62%;
+    --status-partial-bg: 32 45% 20%;
+    --status-paid: 152 55% 58%;
+    --status-paid-bg: 158 35% 18%;
+    --status-overdue: 0 84% 70%;
+    --status-overdue-bg: 0 40% 22%;
+    --status-cancelled: 220 10% 60%;
+    --status-cancelled-bg: 224 18% 18%;
+
+    /**
+     * Séries revalidées CONTRE la surface sombre — #4E86EA / #CE7C28 — et non
+     * un simple éclaircissement des teintes claires, qui sortait de la bande de
+     * luminosité admise en mode sombre (L 0,48–0,67).
+     */
+    --chart-1: 219 79% 61%;
+    --chart-2: 30 67% 48%;
+
+    --shadow-card: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-raised: 0 4px 8px -2px hsl(0 0% 0% / 0.4), 0 16px 32px -12px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+/**
+ * Le mouvement provoque des nausées chez certaines personnes. Ce n'est pas une
+ * préférence esthétique : quand le système le demande, on ne l'ignore pas.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * Impression — c'est ainsi qu'on « télécharge » une facture en PDF tant que la
+ * génération côté serveur n'est pas branchée. La feuille imprimée ne doit
+ * contenir que le document : le reste porte `print:hidden`.
+ */
+@media print {
+  :root {
+    --background: 0 0% 100%;
+    --card: 0 0% 100%;
+    --surface: 0 0% 100%;
+  }
+
+  body {
+    background: white;
+  }
+
+  /* Les ombres et bordures d'écran alourdissent inutilement la page imprimée. */
+  .shadow-card,
+  .shadow-raised {
+    box-shadow: none !important;
+  }
+}
+
+@page {
+  margin: 14mm;
+}
+
+@layer utilities {
+  /* Les montants d'une colonne doivent s'aligner verticalement. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-raised {
+    box-shadow: var(--shadow-raised);
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/check-design-system.mjs --hook",
+            "statusMessage": "Vérification du design system",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
