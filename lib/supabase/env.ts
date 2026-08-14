@@ -54,7 +54,27 @@ export function serviceRoleKey(): string {
  * Surtout pas de préfixe `use` : ESLint prendrait cette fonction pour un hook
  * React et interdirait ses appels hors composant — ce qui faisait échouer
  * `next build`, alors que le serveur de développement, lui, ne lint pas.
+ *
+ * La vraie base est le défaut, et le mock doit être demandé explicitement.
+ * L'inverse — ce qui était le cas — fait qu'une variable oubliée sur
+ * l'hébergeur sert des factures inventées avec l'aplomb des vraies. Pour une
+ * application qui tient la comptabilité de quelqu'un, se tromper de sens est
+ * pire que ne pas démarrer : sans les variables Supabase, `required()` lève une
+ * erreur explicite, et c'est ce qu'on veut voir.
+ *
+ * Une valeur inconnue est refusée plutôt qu'interprétée : une faute de frappe
+ * dans le tableau de bord de l'hébergeur ne doit pas décider silencieusement de
+ * la source des données.
  */
 export function supabaseDataEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_DATA_SOURCE === "supabase";
+  const source = process.env.NEXT_PUBLIC_DATA_SOURCE ?? "supabase";
+
+  if (source !== "supabase" && source !== "mock") {
+    throw new Error(
+      `NEXT_PUBLIC_DATA_SOURCE vaut « ${source} » — les seules valeurs admises ` +
+        `sont « supabase » et « mock ».`,
+    );
+  }
+
+  return source === "supabase";
 }
