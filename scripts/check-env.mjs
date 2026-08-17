@@ -69,4 +69,45 @@ if (manquantes.length > 0) {
   ]);
 }
 
-console.log(`✓ Variables d'environnement présentes (source : ${source})`);
+/**
+ * Présence ne vaut pas validité.
+ *
+ * Coller une valeur dans le tableau de bord d'un hébergeur y ajoute facilement
+ * des guillemets, une espace ou un retour à la ligne. La variable est alors bien
+ * « présente », le build passe, et c'est `createServerClient` qui casse à
+ * l'exécution sur un « Invalid URL » — dans le middleware, donc sur toutes les
+ * pages à la fois, avec un code opaque côté hébergeur. Autant le voir ici.
+ */
+const defauts = [];
+
+for (const [nom] of REQUISES) {
+  const brut = process.env[nom];
+
+  if (brut !== brut.trim()) {
+    defauts.push(`${nom} commence ou finit par une espace ou un retour à la ligne.`);
+    continue;
+  }
+  if (/^["']|["']$/.test(brut)) {
+    defauts.push(`${nom} est entourée de guillemets — l'hébergeur les garde tels quels.`);
+  }
+}
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL.trim();
+
+try {
+  const analysee = new URL(url);
+  if (analysee.protocol !== "https:") {
+    defauts.push(`NEXT_PUBLIC_SUPABASE_URL n'est pas en https (${analysee.protocol}).`);
+  }
+  if (url.endsWith("/")) {
+    defauts.push("NEXT_PUBLIC_SUPABASE_URL finit par une barre oblique — la retirer.");
+  }
+} catch {
+  defauts.push(`NEXT_PUBLIC_SUPABASE_URL n'est pas une URL valide : « ${url} ».`);
+}
+
+if (defauts.length > 0) {
+  echouer(["Valeurs mal formées :", "", ...defauts.map((defaut) => `  • ${defaut}`)]);
+}
+
+console.log(`✓ Variables d'environnement valides (source : ${source})`);
