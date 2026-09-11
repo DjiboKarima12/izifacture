@@ -1,0 +1,32 @@
+-- Referme la concession d'`execute` faite à PUBLIC, que la migration
+-- `20260813180000_restrict_anon_execute` avait laissée ouverte.
+--
+-- CE QUI MANQUAIT — cette migration-là révoquait depuis `anon` et
+-- `authenticated`, en s'appuyant sur le fait qu'une révocation depuis PUBLIC
+-- n'annule pas une concession nominative. C'est vrai, mais la réciproque l'est
+-- tout autant : révoquer depuis `anon` n'annule pas une concession faite à
+-- PUBLIC. Or PostgreSQL en pose une sur CHAQUE fonction créée, et `anon` en
+-- hérite. Les deux révocations sont nécessaires ; il n'y en avait qu'une.
+--
+-- L'ACL le montrait sans ambiguïté : l'entrée de tête `=X/postgres` — un
+-- bénéficiaire vide, donc PUBLIC — subsistait sur onze des dix-neuf fonctions.
+-- Seule `get_public_invoice` était propre, parce qu'elle avait reçu un
+-- `revoke ... from public` nommément.
+--
+-- CE QUE ÇA CHANGEAIT EN PRATIQUE — `dashboard_stats` et `monthly_totals`
+-- restaient appelables sans authentification. Aucune fuite : elles ne sont pas
+-- `security definer`, donc la RLS s'applique à l'appelant et un anonyme n'a
+-- accès à aucune ligne. Mais c'est du calcul offert à qui le demande, et
+-- surtout ce n'est pas ce que le schéma prétend garantir.
+--
+-- Les onze autres sont des fonctions de trigger. Les fermer ne casse rien :
+-- PostgreSQL vérifie le droit d'exécution à la CRÉATION du trigger, jamais à
+-- son déclenchement. Ce sont les triggers en place qui les appellent, avec les
+-- droits du propriétaire de la table.
+
+revoke execute on all functions in schema public from public;
+
+-- Les concessions nominatives posées par `20260813180000` ne sont pas touchées :
+-- ce sont des entrées d'ACL distinctes. `service_role` conserve les siennes,
+-- `authenticated` garde les huit fonctions dont l'application a besoin, et
+-- `anon` garde `get_public_invoice`, seule porte non authentifiée du produit.
