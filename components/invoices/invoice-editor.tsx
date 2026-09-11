@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -199,7 +198,20 @@ export function InvoiceEditor({
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
   /** Renseigné après enregistrement : déclenche la boîte de confirmation. */
-  const [saved, setSaved] = React.useState<{ id: string; draft: boolean } | null>(null);
+  /**
+   * Le numéro est FIGÉ ici, au moment du succès, et non relu depuis les props.
+   *
+   * `router.refresh()` juste avant fait revenir du serveur une séquence déjà
+   * incrémentée : `numberPreview` vaut alors le numéro de la PROCHAINE facture.
+   * La boîte annonçait donc « FAC-2026-0011 enregistrée » pour une facture
+   * numérotée 0010. Sur un document comptable, c'est le genre d'erreur qu'on ne
+   * remarque qu'en cherchant une facture qui n'existe pas.
+   */
+  const [saved, setSaved] = React.useState<{
+    id: string;
+    draft: boolean;
+    number: string;
+  } | null>(null);
 
   /**
    * Construit l'entrée à partir de l'état du formulaire et délègue au serveur.
@@ -266,8 +278,32 @@ export function InvoiceEditor({
       // On rafraîchit avant d'ouvrir la boîte : la liste et le tableau de bord
       // doivent déjà refléter le nouveau document quand l'utilisateur y va.
       router.refresh();
-      setSaved({ id: result.data.id, draft: !issue });
+      setSaved({ id: result.data.id, draft: !issue, number: numberPreview });
     });
+  };
+
+  /**
+   * Remet le formulaire à blanc pour la vente suivante.
+   *
+   * C'est le geste du comptoir : on encaisse, on tend le reçu, et le client
+   * d'après est déjà là. Obliger à cliquer sur « Nouvelle facture » ajoutait une
+   * étape à l'opération la plus répétée de la journée.
+   *
+   * Appelé à la FERMETURE de la boîte de confirmation, pas au succès : tant
+   * qu'elle est ouverte, le formulaire porte encore la facture qu'on vient de
+   * créer, donc « Imprimer » sort le bon ticket. Vider avant aurait imprimé un
+   * ticket vide.
+   */
+  const resetForm = () => {
+    setClientId("");
+    setIssueDate(todayIso());
+    setDueDate(computeDueDate(todayIso(), organization.defaultPaymentTerms));
+    setNotes("");
+    setLines([newLine(organization.defaultTaxRate)]);
+    setSettled(false);
+    setMethod("cash");
+    setReceived("");
+    setError(null);
   };
 
   const updateLine = (id: string, patch: Partial<LineState>) =>
@@ -726,15 +762,6 @@ export function InvoiceEditor({
               }
             />
 
-            {issued ? (
-              <Button asChild variant="outline">
-                <Link href="/invoices/new">
-                  <Plus aria-hidden />
-                  Nouvelle facture
-                </Link>
-              </Button>
-            ) : null}
-
             {pending ? (
               <span className="text-xs text-muted-foreground">Enregistrement…</span>
             ) : null}
@@ -754,10 +781,16 @@ export function InvoiceEditor({
 
         <InvoiceCreatedDialog
           invoiceId={saved?.id ?? null}
-          number={saved && !saved.draft ? numberPreview : null}
+          number={saved && !saved.draft ? saved.number : null}
           isDraft={saved?.draft ?? false}
           onOpenChange={(open) => {
-            if (!open) setSaved(null);
+            if (open) return;
+
+            // Un BROUILLON n'est pas vidé : on le rouvre pour le compléter, il
+            // n'y a pas de « vente suivante » derrière.
+            const creee = saved !== null && !saved.draft;
+            setSaved(null);
+            if (creee && !isEditing) resetForm();
           }}
         />
 
