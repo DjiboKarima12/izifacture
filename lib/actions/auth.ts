@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -84,6 +85,57 @@ export async function createOrganization(name: string): Promise<ActionResult> {
 
   const supabase = createSupabaseServerClient();
   const { error } = await supabase.rpc("create_organization", { p_name: parsed.data });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Envoie un lien de réinitialisation de mot de passe par email.
+ *
+ * Même principe anti-énumération que pour `signIn` : on retourne toujours un
+ * message de succès, que le compte existe ou non. Un attaquant ne doit pas
+ * pouvoir distinguer les deux cas.
+ */
+export async function resetPassword(input: unknown): Promise<ActionResult> {
+  const parsed = z.object({ email: emailSchema }).safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const origin = headers().get("origin") ?? "";
+  const supabase = createSupabaseServerClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  });
+
+  if (error) {
+    console.error("Erreur lors de l'envoi de l'email de réinitialisation :", error);
+  }
+
+  // Toujours un succès — ne pas révéler si le compte existe.
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Met à jour le mot de passe de l'utilisateur connecté.
+ *
+ * Appelé depuis la page `/reset-password`, après que le callback ait échangé le
+ * code de réinitialisation contre une session.
+ */
+export async function updatePassword(input: unknown): Promise<ActionResult> {
+  const parsed = z
+    .object({
+      password: z.string().min(8, "Le mot de passe doit faire au moins 8 caractères."),
+    })
+    .safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const supabase = createSupabaseServerClient();
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/", "layout");

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +25,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
+  const [showPassword, setShowPassword] = React.useState(false);
   const [form, setForm] = React.useState({
     fullName: "",
     organizationName: "",
@@ -117,15 +119,41 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                 required
                 hint={isSignUp ? "8 caractères minimum." : undefined}
               >
-                <Input
-                  id="password"
-                  type="password"
-                  value={form.password}
-                  onChange={set("password")}
-                  autoComplete={isSignUp ? "new-password" : "current-password"}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={set("password")}
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
+                    className="pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="size-4" aria-hidden />
+                    ) : (
+                      <Eye className="size-4" aria-hidden />
+                    )}
+                  </button>
+                </div>
               </Field>
+
+              {!isSignUp ? (
+                <div className="flex justify-end">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-medium text-interactive underline-offset-4 hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+              ) : null}
 
               {error ? (
                 <p role="alert" className="text-sm text-destructive">
