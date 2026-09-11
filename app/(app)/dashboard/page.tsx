@@ -58,6 +58,8 @@ export default async function DashboardPage() {
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
+          order={0}
+          accent="paid"
           label="Total Encaissé"
           value={formatAmount(stats.totalPaid, session.organization.currency)}
           context={
@@ -68,12 +70,16 @@ export default async function DashboardPage() {
           icon={Wallet}
         />
         <StatCard
+          order={1}
+          accent="pending"
           label="Factures en Attente"
           value={formatAmount(stats.totalOutstanding, session.organization.currency)}
           context={`${outstandingCount} facture${outstandingCount > 1 ? "s" : ""} envoyée${outstandingCount > 1 ? "s" : ""}`}
           icon={FileText}
         />
         <StatCard
+          order={2}
+          accent="overdue"
           label="En Retard"
           value={formatAmount(stats.totalOverdue, session.organization.currency)}
           context={`${stats.overdueCount} facture${stats.overdueCount > 1 ? "s" : ""} en retard`}
@@ -81,6 +87,8 @@ export default async function DashboardPage() {
           tone="critical"
         />
         <StatCard
+          order={3}
+          accent="info"
           label="Nouveaux Clients"
           value={`+${newClients}`}
           context="Ce mois-ci"
@@ -88,7 +96,8 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card className="mt-5">
+      {/* Entre après les quatre tuiles : la rangée se pose, puis le tableau. */}
+      <Card className="mt-5 animate-rise-in" style={{ animationDelay: "260ms" }}>
         <CardHeader className="flex-row items-start justify-between gap-4 pb-4">
           <div className="space-y-1">
             <h2 className="text-base font-semibold">Factures Récentes</h2>
@@ -156,7 +165,8 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
-      <Card className="mt-5">
+      {/* Le graphique ferme la séquence : on le lit après les chiffres. */}
+      <Card className="mt-5 animate-rise-in" style={{ animationDelay: "320ms" }}>
         <CardHeader className="pb-4">
           <h2 className="text-base font-semibold">Facturé et encaissé</h2>
           <p className="text-sm text-muted-foreground">Sur les 12 derniers mois.</p>

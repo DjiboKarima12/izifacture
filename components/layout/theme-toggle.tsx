@@ -31,7 +31,9 @@ export function ThemeToggle() {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground">
+    // Vit dans la barre latérale, sur fond vert sombre : les jetons généraux y
+    // donneraient du gris foncé sur vert foncé.
+    <div className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-sidebar-muted">
       <Moon className="size-[18px] shrink-0" aria-hidden />
       <span>Mode sombre</span>
       <Switch checked={dark} onCheckedChange={toggle} label="Activer le mode sombre" className="ml-auto" />

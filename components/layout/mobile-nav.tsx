@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
 import { Sidebar } from "@/components/layout/sidebar";
+import type { Plan } from "@/lib/plan";
 
 /**
  * Tiroir de navigation mobile. Les utilisateurs cibles sont majoritairement sur
@@ -14,9 +15,11 @@ import { Sidebar } from "@/components/layout/sidebar";
  */
 export function MobileNav({
   user,
+  plan,
   canSignOut = false,
 }: {
   user: { name: string; email: string };
+  plan: Plan;
   canSignOut?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -46,12 +49,17 @@ export function MobileNav({
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/20 animate-overlay-in lg:hidden" />
-        <Dialog.Content className="fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-background shadow-raised animate-fade-in lg:hidden">
+        <Dialog.Content className="fixed inset-y-0 left-0 z-50 w-72 bg-sidebar shadow-raised animate-fade-in lg:hidden">
           <Dialog.Title className="sr-only">Navigation</Dialog.Title>
           <Dialog.Description className="sr-only">
             Navigation principale de l&apos;application
           </Dialog.Description>
-          <Sidebar user={user} canSignOut={canSignOut} onNavigate={() => setOpen(false)} />
+          <Sidebar
+            user={user}
+            plan={plan}
+            canSignOut={canSignOut}
+            onNavigate={() => setOpen(false)}
+          />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

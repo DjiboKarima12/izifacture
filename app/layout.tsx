@@ -10,8 +10,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "IziFacture",
-    template: "%s · IziFacture",
+    default: "MaMaFacture",
+    template: "%s · MaMaFacture",
   },
   description: "La facturation simple pour les entrepreneurs africains.",
 };

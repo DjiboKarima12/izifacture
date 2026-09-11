@@ -27,7 +27,8 @@ Les huit règles qu'on enfreint le plus souvent, à connaître sans ouvrir le do
    et éléments de nav · `rounded-full` avatars. `rounded` nu et `rounded-2xl` sont refusés.
 5. **Ombres** : `shadow-card` (au repos) ou `shadow-raised` (flottant). Rien d'autre.
 6. **Animations** : `animate-fade-in` / `animate-overlay-in` (180 ms) pour les surfaces flottantes,
-   `transition-colors` pour les états. Aucune animation d'entrée sur du contenu de page.
+   `transition-colors` pour les états, `animate-rise-in` (240 ms) pour l'entrée du contenu au
+   chargement — au tableau de bord seulement, jamais sur un écran de saisie.
 7. **Focus visible obligatoire** sur tout élément atteignable au clavier
    (`focus-visible:ring-2 focus-visible:ring-ring`).
 8. **Nombres à droite avec `tabular`**, texte à gauche. Une seule action `primary` par écran.
@@ -95,11 +96,21 @@ npm run build         # ⚠ arrêter `npm run dev` avant : les deux écrivent da
 13 triggers, 2 vues, RLS et 28 politiques), et `NEXT_PUBLIC_DATA_SOURCE=supabase` : l'application
 lit la vraie base. Le mock reste disponible en repassant la variable à `mock`.
 
-Pas de Docker ici, donc pas de `supabase start` : la base locale n'existe pas et les migrations
-s'appliquent sur le projet distant. La CLI Supabase est installée (`npx supabase`), mais elle n'est
-ni authentifiée ni liée — `db push` demande une chaîne de connexion en port **5432** (mode session ;
-le 6543 est en mode transaction et refuse les fonctions PL/pgSQL).
+Toutes les migrations du dépôt sont appliquées, et le registre
+`supabase_migrations.schema_migrations` existe désormais : il était absent, le schéma initial ayant
+été posé à la main. Les huit versions y sont inscrites, donc `db push` sait où il en est au lieu de
+vouloir tout rejouer.
 
-**À faire :** la migration `20260813180000_restrict_anon_execute.sql` n'est pas encore passée. Sans
-elle, `next_document_number` reste appelable sans authentification et permet de creuser des trous
-dans la numérotation (cf. règle métier 4).
+Pas de Docker ici, donc pas de `supabase start` : la base locale n'existe pas et les migrations
+s'appliquent sur le projet distant. Deux chemins, aucun automatique pour l'instant :
+
+- `npx supabase db push` — la CLI est installée mais ni authentifiée ni liée, et `db push` demande
+  une chaîne de connexion en port **5432** (mode session ; le 6543 est en mode transaction et
+  refuse les fonctions PL/pgSQL).
+- l'API de gestion (`POST /v1/projects/{ref}/database/migrations`, qui applique *et* inscrit la
+  version) — la lecture fonctionne avec un jeton `sbp_`, mais **toute écriture renvoie 403** sur ce
+  compte, y compris avec un jeton de compte fraîchement créé. `GET /v1/organizations` renvoie `[]`,
+  ce qui pointe vers un droit manquant sur l'organisation plutôt que sur le jeton.
+
+En attendant, une migration s'applique en la collant dans l'éditeur SQL du tableau de bord, suivie
+d'un `insert` dans `supabase_migrations.schema_migrations` pour que `db push` ne la rejoue pas.

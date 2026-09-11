@@ -12,22 +12,56 @@
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 33% 11%;
+    /**
+     * SABLE — la base n'est plus blanche mais crème, et le gris n'est plus froid.
+     *
+     * Quatre traitements gris ont été refusés avant celui-ci. Ce qui change ici
+     * n'est pas une valeur mais une famille : toutes les neutres portent la même
+     * chaleur (teintes 28–39°), depuis le fond de page jusqu'aux bordures. Un
+     * seul gris froid oublié au milieu suffirait à faire paraître sale tout le
+     * reste — c'est ce qui rendait les essais précédents ternes.
+     */
+    --background: 37 67% 98%;
+    --foreground: 35 31% 11%;
 
-    /* Fonds de section. La sidebar est en `background`, séparée par une bordure. */
-    --surface: 220 20% 97%;
-    --surface-strong: 220 16% 94%;
+    /**
+     * Fond de la zone de contenu. La barre latérale a ses propres jetons.
+     *
+     * 93 % de luminosité contre 100 % pour les cartes : sept points d'écart, là
+     * où il y en avait trois. Les cartes se posent enfin SUR quelque chose au
+     * lieu de flotter dans du blanc.
+     *
+     * Et un gris NEUTRE, sans teinte verte. Deux essais teintés ont été refusés :
+     * la marque parle déjà par la barre latérale et par les boutons, la répéter
+     * sur le fond sature l'écran au lieu de le poser.
+     */
+    --surface: 37 36% 90%;
+    --surface-strong: 37 34% 83%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 33% 11%;
+    --card: 37 67% 98%;
+    --card-foreground: 35 31% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 33% 11%;
+    --popover: 37 67% 98%;
+    --popover-foreground: 35 31% 11%;
 
-    /* Bleu marine : l'action principale et une seule par écran. */
-    --primary: 224 64% 33%;
-    --primary-hover: 224 64% 27%;
+    /**
+     * Vert de l'enseigne : l'action principale, et une seule par écran.
+     *
+     * C'est la couleur que le client voit déjà sur la devanture et sur le logo
+     * imprimé en tête de son reçu. La reconnaissance vient de la répétition, pas
+     * de la nouveauté : trois identités différentes n'en font retenir aucune.
+     *
+     * Le bleu vif reste réservé aux CONTRÔLES (--interactive) : anneau de focus,
+     * interrupteurs, éléments actifs. Deux rôles, deux couleurs — c'est la
+     * distinction du système d'origine, seule la teinte de l'action change.
+     *
+     * Contrastes MESURÉS par `npm run check:contrast` : blanc sur
+     * ce vert 7,96:1, et 10,65:1 au survol. Le minimum AA pour du texte est de
+     * 4,5:1 — la marge couvre un écran de téléphone en plein soleil, ce qui est
+     * la condition d'usage réelle ici.
+     */
+    --primary: 158 64% 22%;
+    --primary-hover: 158 64% 17%;
     --primary-foreground: 0 0% 100%;
 
     /* Bleu vif : interrupteurs, cases à cocher, focus, états actifs. */
@@ -36,24 +70,58 @@
     --interactive-foreground: 0 0% 100%;
     --interactive-soft: 214 100% 97%;
 
-    --secondary: 220 18% 96%;
+    --secondary: 39 44% 94%;
     --secondary-foreground: 222 25% 22%;
 
-    --muted: 220 20% 97%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 39 44% 94%;
+    /* Valeur mesurée, pas choisie à l'œil : cf. `npm run check:contrast`. */
+    --muted-foreground: 35 13% 38%;
 
-    --accent: 214 100% 97%;
-    --accent-foreground: 224 64% 33%;
+    /* Teinte douce de la marque : pastille d'avatar, survol de menu, badge premium. */
+    --accent: 152 45% 94%;
+    --accent-foreground: 158 64% 22%;
 
     /* Vert de la marque (marque de l'en-tête de facture). */
     --brand: 158 64% 22%;
     --brand-foreground: 0 0% 100%;
 
+    /**
+     * BARRE LATÉRALE — un jeu de couleurs à elle, et c'est le point.
+     *
+     * Elle était blanche comme les cartes : la navigation et le contenu se
+     * confondaient, et le vert de l'enseigne ne tenait que sur deux boutons.
+     * En lui donnant une surface pleine, la couleur devient l'identité de
+     * l'application au lieu d'un détail.
+     *
+     * Ses propres jetons, plutôt que de détourner les jetons généraux : le
+     * texte y vit sur un fond sombre alors que tout le reste de l'interface
+     * est clair. Sans cette séparation, le mode sombre devrait inverser deux
+     * choses à la fois et l'une des deux finirait illisible.
+     */
+    /**
+     * Brun très sombre, pas noir : la même famille chaude que le fond, poussée
+     * au bout de l'échelle. C'est ce qui fait tenir l'ensemble — une barre
+     * neutre ou verte sur un fond sable donnerait deux univers côte à côte.
+     *
+     * Le texte n'y est pas blanc pur mais crème, comme les cartes : du blanc
+     * franc sur du brun tranche trop et fatigue à la lecture prolongée.
+     */
+    --sidebar: 28 28% 13%;
+    --sidebar-foreground: 38 83% 95%;
+    --sidebar-muted: 34 22% 63%;
+    --sidebar-active: 29 27% 19%;
+    --sidebar-border: 30 28% 23%;
+
+    /* Or du logo : la seule touche chaude, réservée à la pastille de marque. */
+    --sidebar-mark: 36 67% 55%;
+    --sidebar-mark-foreground: 28 28% 13%;
+
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 16% 91%;
-    --input: 220 16% 88%;
+    /* Chaudes elles aussi : une bordure grise sur un fond sable se voit tout de suite. */
+    --border: 36 29% 82%;
+    --input: 38 27% 74%;
     --ring: 221 83% 53%;
 
     --status-draft: 220 9% 46%;
@@ -64,7 +132,9 @@
     --status-partial-bg: 45 100% 96%;
     --status-paid: 158 64% 30%;
     --status-paid-bg: 152 62% 96%;
-    --status-overdue: 0 72% 51%;
+    /* 49 % et non 51 % : sur son propre fond, le rouge tombait à 4,32:1, sous le
+       minimum AA. Écart invisible à l'œil, mesuré par `npm run check:contrast`. */
+    --status-overdue: 0 72% 49%;
     --status-overdue-bg: 0 100% 97%;
     --status-cancelled: 220 9% 58%;
     --status-cancelled-bg: 220 16% 96%;
@@ -80,7 +150,13 @@
 
     --radius: 0.75rem;
 
-    --shadow-card: 0 1px 2px 0 hsl(222 24% 12% / 0.04), 0 1px 3px 0 hsl(222 24% 12% / 0.04);
+    /**
+     * Deux couches : un liseré net au ras de la carte, et une diffusion plus
+     * large qui la décolle du fond. Les valeurs précédentes (0,04 sur les deux)
+     * étaient sous le seuil de perception sur un écran ordinaire — les cartes se
+     * confondaient avec la surface, et l'interface paraissait plate.
+     */
+    --shadow-card: 0 1px 2px 0 hsl(222 24% 12% / 0.06), 0 4px 10px -2px hsl(222 24% 12% / 0.07);
     --shadow-raised: 0 4px 8px -2px hsl(222 24% 12% / 0.08), 0 16px 32px -12px hsl(222 24% 12% / 0.16);
   }
 
@@ -98,9 +174,9 @@
     --popover: 224 22% 14%;
     --popover-foreground: 220 20% 96%;
 
-    /* En sombre, le marine disparaîtrait sur le fond : on éclaircit le bleu. */
-    --primary: 221 83% 60%;
-    --primary-hover: 221 83% 66%;
+    /* En sombre, le vert profond disparaîtrait sur le fond : on l'éclaircit. */
+    --primary: 158 50% 45%;
+    --primary-hover: 158 50% 52%;
     --primary-foreground: 224 45% 10%;
 
     --interactive: 217 91% 62%;
@@ -114,11 +190,21 @@
     --muted: 224 20% 16%;
     --muted-foreground: 220 12% 65%;
 
-    --accent: 224 40% 20%;
-    --accent-foreground: 214 96% 82%;
+    --accent: 158 30% 20%;
+    --accent-foreground: 152 55% 78%;
 
     --brand: 158 50% 45%;
     --brand-foreground: 224 45% 10%;
+
+    /* En sombre, la barre se fond dans l'ambiance : plus froide, moins saturée. */
+    --sidebar: 165 22% 10%;
+    --sidebar-foreground: 150 25% 94%;
+    --sidebar-muted: 155 14% 62%;
+    --sidebar-active: 158 30% 20%;
+    --sidebar-border: 160 18% 18%;
+
+    --sidebar-mark: 38 55% 58%;
+    --sidebar-mark-foreground: 165 22% 10%;
 
     --destructive: 0 72% 60%;
     --destructive-foreground: 224 45% 10%;
@@ -176,6 +262,38 @@
  * Le mouvement provoque des nausées chez certaines personnes. Ce n'est pas une
  * préférence esthétique : quand le système le demande, on ne l'ignore pas.
  */
+/**
+ * Entrée du contenu de page — opacité et huit pixels de montée.
+ *
+ * Le système l'interdisait : « le contenu apparaît, il ne se met pas en scène ».
+ * La règle a été levée à la demande du propriétaire du produit, et la section 2
+ * de docs/design-system.md porte l'amendement et ses garde-fous.
+ *
+ * Ce qui la rend acceptable : elle ne joue qu'AU CHARGEMENT, jamais en réaction
+ * à une action ; 240 ms, assez pour se voir et trop court pour faire attendre ;
+ * et les éléments ne bougent que de huit pixels, donc rien ne saute.
+ *
+ * `prefers-reduced-motion` la neutralise comme le reste, plus bas.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-rise-in {
+    /* `backwards` : l'élément reste invisible pendant son délai d'attente.
+       Sans ça, une tuile décalée s'affiche, disparaît, puis s'anime. */
+    animation: rise-in 0.24s ease-out backwards;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -210,8 +328,28 @@
   }
 }
 
+/**
+ * Marge nulle, VOLONTAIREMENT.
+ *
+ * Le navigateur dessine ses en-têtes et pieds de page (date, titre de l'onglet,
+ * URL, numéro de page) DANS la marge de `@page`. Une facture envoyée à un
+ * client ne peut pas porter « localhost:3001/invoices/… ». En ramenant la marge
+ * à zéro, Chrome et Edge n'ont plus de bande où les écrire et les omettent ;
+ * la marge du document est reportée sur le document lui-même
+ * (`print:p-[14mm]` sur l'article de `invoice-preview`).
+ *
+ * Firefox et Safari gardent leur propre réglage : là, l'utilisateur décoche
+ * « En-têtes et pieds de page » dans la boîte d'impression.
+ */
 @page {
-  margin: 14mm;
+  /*
+   * Repli seulement. `size` n'accepte PAS « 80mm auto » : mélanger une
+   * longueur et le mot-clé `auto` rend la déclaration invalide, le
+   * navigateur la jette et imprime en A4. La hauteur réelle est écrite
+   * en JavaScript par `PrintPageSize`, qui mesure le document.
+   */
+  size: 80mm 297mm;
+  margin: 0;
 }
 
 @layer utilities {

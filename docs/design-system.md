@@ -99,12 +99,27 @@ Trois mouvements, pas un de plus.
 | `animate-overlay-in` | 180 ms `ease-out` | Voile derrière un dialogue. Opacité seule. |
 | `transition-colors` | défaut (150 ms) | **Tout** changement d'état au survol ou au focus. |
 
-Cas particuliers admis : `transition-transform` sur le curseur d'un `Switch`,
-`transition-opacity` sur les barres du graphique au survol.
+| `animate-rise-in` | 240 ms `ease-out` | Entrée du contenu au chargement d'une page. Opacité + 8 px de montée. |
 
-**Interdits** : animation d'entrée sur du contenu de page (le contenu apparaît, il ne se met pas en
-scène), rotation, rebond, durée supérieure à 200 ms, animation en boucle hors indicateur de
-chargement.
+Cas particuliers admis : `transition-transform` sur le curseur d'un `Switch`,
+`transition-opacity` sur les barres du graphique au survol, `transition-shadow` sur une carte
+survolable.
+
+**`animate-rise-in` est un amendement**, demandé par le propriétaire du produit le 11 septembre 2026.
+La version précédente de cette règle interdisait toute animation d'entrée sur du contenu de page —
+« le contenu apparaît, il ne se met pas en scène ». Ce qui la rend tenable :
+
+- elle ne joue **qu'au chargement**, jamais en réaction à une action de l'utilisateur ;
+- **240 ms**, assez pour se voir, trop court pour faire attendre ;
+- **8 px** de déplacement : rien ne saute, rien ne se réorganise sous le curseur ;
+- le décalage entre éléments reste **sous 100 ms** — au-delà, on regarde l'interface se construire
+  au lieu de la lire.
+
+Elle ne s'applique qu'au tableau de bord, où l'on arrive. **Pas sur les écrans de saisie** : une
+facture en cours de rédaction ne se remet pas en scène à chaque enregistrement.
+
+**Interdits** : rotation, rebond, durée supérieure à 250 ms, animation en boucle hors indicateur de
+chargement, et toute animation déclenchée par une saisie.
 
 `prefers-reduced-motion: reduce` neutralise tout, globalement, dans `globals.css`. Ce n'est pas une
 option : le mouvement déclenche des nausées chez certaines personnes.
