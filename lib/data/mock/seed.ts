@@ -19,6 +19,7 @@ import { addDays, addMonths, todayIso } from "@/lib/dates";
 import { formatDocumentNumber } from "@/lib/numbering";
 import type {
   Client,
+  Product,
   Invoice,
   InvoiceEvent,
   InvoiceItem,
@@ -36,6 +37,7 @@ export type MockDb = {
   organizations: Organization[];
   members: MemberRow[];
   clients: Client[];
+  products: Product[];
   invoices: Invoice[];
   items: InvoiceItem[];
   payments: Payment[];
@@ -452,10 +454,32 @@ function buildDataset(): MockDb {
     },
   ];
 
+  /**
+   * Catalogue de démonstration, dérivé des mêmes prestations que les factures :
+   * un jeu d'essai où le catalogue et l'historique se contredisent serait pire
+   * que pas de catalogue du tout.
+   *
+   * Les codes-barres ne sont posés que sur une partie — c'est le cas réel, une
+   * prestation n'en a pas.
+   */
+  const products: Product[] = SERVICES.map((service, index) => ({
+    id: nextId(),
+    orgId,
+    name: service.description,
+    unitPrice: service.price,
+    taxRate: 18,
+    barcode: index % 3 === 0 ? `600${String(index + 1).padStart(10, "0")}` : null,
+    unit: null,
+    notes: null,
+    archivedAt: null,
+    createdAt,
+  }));
+
   return {
     organizations: [organization],
     members,
     clients,
+    products,
     invoices,
     items,
     payments,

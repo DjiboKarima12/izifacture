@@ -117,6 +117,29 @@ export type Client = {
   createdAt: IsoTimestamp;
 };
 
+/**
+ * Article du catalogue.
+ *
+ * La ligne de facture RECOPIE le nom, le prix et le taux au moment de la vente :
+ * changer un prix au catalogue ne doit pas réécrire les factures déjà émises.
+ * Le produit sert à saisir vite, pas à définir ce qui a été vendu.
+ */
+export type Product = {
+  id: UUID;
+  orgId: UUID;
+  name: string;
+  /** Entier en unités mineures, comme tous les montants. */
+  unitPrice: number;
+  taxRate: number;
+  /** Facultatif : l'attiéké n'a pas de code-barres, la boîte de lait si. */
+  barcode: string | null;
+  /** « kg », « plat », « sachet »… Affiché à titre indicatif. */
+  unit: string | null;
+  notes: string | null;
+  archivedAt: IsoTimestamp | null;
+  createdAt: IsoTimestamp;
+};
+
 export type InvoiceItem = {
   id: UUID;
   invoiceId: UUID;

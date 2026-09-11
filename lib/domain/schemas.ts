@@ -90,6 +90,39 @@ export const clientInputSchema = z.object({
 
 export type ClientInput = z.infer<typeof clientInputSchema>;
 
+/* ------------------------------------------------------------- Produits */
+
+export const productInputSchema = z.object({
+  name: z.string().trim().min(1, "Le nom du produit est requis").max(200),
+  unitPrice: amountSchema,
+  taxRate: taxRateSchema,
+  /**
+   * Un code-barres est une suite de caractères imprimables sans espace. On
+   * rogne les blancs : les lecteurs en ajoutent souvent un avant l'entrée, et
+   * un code invisible mais différent ne serait jamais retrouvé au scan.
+   */
+  barcode: z
+    .string()
+    .trim()
+    .max(64)
+    .regex(/^[!-~]*$/, "Code-barres invalide")
+    .nullable()
+    .optional()
+    /**
+     * La conversion vient APRÈS la validation, et non dans un `.or()`.
+     *
+     * La regex accepte la chaîne vide, donc `""` satisfaisait la première
+     * branche et n'atteignait jamais la conversion : le produit partait en base
+     * avec un code vide au lieu de `null`, et l'index unique sur (org, code)
+     * aurait refusé le deuxième produit sans code-barres.
+     */
+    .transform((value) => (value == null || value === "" ? null : value)),
+  unit: optionalText(20),
+  notes: optionalText(1000),
+});
+
+export type ProductInput = z.infer<typeof productInputSchema>;
+
 /* -------------------------------------------------------------- Remises */
 
 export const discountSchema = z

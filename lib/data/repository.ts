@@ -26,6 +26,7 @@ import type {
   Organization,
   Payment,
   PaymentMethod,
+  Product,
   RecurringSchedule,
   UUID,
 } from "@/lib/domain/types";
@@ -34,6 +35,7 @@ import type {
   InvoiceInput,
   OrganizationSettingsInput,
   PaymentInput,
+  ProductInput,
   RecurringScheduleInput,
 } from "@/lib/domain/schemas";
 
@@ -55,6 +57,14 @@ export type InvoiceListFilters = {
 };
 
 export type ClientListFilters = {
+  search?: string;
+  includeArchived?: boolean;
+  page?: number;
+  pageSize?: number;
+};
+
+export type ProductListFilters = {
+  /** Nom ou code-barres. */
   search?: string;
   includeArchived?: boolean;
   page?: number;
@@ -108,6 +118,26 @@ export interface ClientRepo {
   /** Archivage logique : un client facturé ne doit jamais disparaître. */
   archive(orgId: UUID, clientId: UUID): Promise<void>;
   restore(orgId: UUID, clientId: UUID): Promise<void>;
+}
+
+export interface ProductRepo {
+  list(orgId: UUID, filters?: ProductListFilters): Promise<Paginated<Product>>;
+  get(orgId: UUID, productId: UUID): Promise<Product | null>;
+
+  /**
+   * Recherche par code-barres, pour le scan en caisse.
+   *
+   * Ne renvoie JAMAIS un produit archivé : on retire un article du catalogue
+   * précisément pour qu'il cesse d'être vendu, et un scan ne doit pas le
+   * ressusciter.
+   */
+  findByBarcode(orgId: UUID, barcode: string): Promise<Product | null>;
+
+  create(orgId: UUID, input: ProductInput): Promise<Product>;
+  update(orgId: UUID, productId: UUID, input: ProductInput): Promise<Product>;
+  /** Archivage logique : un produit déjà facturé ne doit jamais disparaître. */
+  archive(orgId: UUID, productId: UUID): Promise<void>;
+  restore(orgId: UUID, productId: UUID): Promise<void>;
 }
 
 export interface InvoiceRepo {
@@ -166,6 +196,7 @@ export interface RecurringRepo {
 export type Repositories = {
   organizations: OrganizationRepo;
   clients: ClientRepo;
+  products: ProductRepo;
   invoices: InvoiceRepo;
   payments: PaymentRepo;
   recurring: RecurringRepo;

@@ -26,6 +26,7 @@ import type {
   InvoiceStatus,
   Organization,
   Payment,
+  Product,
   PaymentMethod,
   RecurrenceFrequency,
   RecurringSchedule,
@@ -191,6 +192,36 @@ export function toOrganization(row: OrganizationRow): Organization {
     quotePrefix: row.quote_prefix,
     creditNotePrefix: row.credit_note_prefix,
     invoiceFooter: row.invoice_footer,
+    createdAt: row.created_at,
+  };
+}
+
+export type ProductRow = {
+  id: string;
+  org_id: string;
+  name: string;
+  unit_price: number | string;
+  tax_rate: number | string;
+  barcode: string | null;
+  unit: string | null;
+  notes: string | null;
+  archived_at: string | null;
+  created_at: string;
+};
+
+export function toProduct(row: ProductRow): Product {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    name: row.name,
+    // `bigint` et `numeric` reviennent en CHAÎNE selon le pilote : sans
+    // conversion, un prix deviendrait une concaténation au premier calcul.
+    unitPrice: toNumber(row.unit_price),
+    taxRate: toNumber(row.tax_rate),
+    barcode: row.barcode,
+    unit: row.unit,
+    notes: row.notes,
+    archivedAt: row.archived_at,
     createdAt: row.created_at,
   };
 }

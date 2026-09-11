@@ -12,6 +12,8 @@ import {
   type OrganizationRepo,
   type PaymentListFilters,
   type PaymentRepo,
+  type ProductListFilters,
+  type ProductRepo,
   type RecurringRepo,
   type Repositories,
 } from "@/lib/data/repository";
@@ -20,6 +22,7 @@ import { todayIso } from "@/lib/dates";
 import {
   INVOICE_ITEM_COLUMNS,
   toClient,
+  toProduct,
   toInvoice,
   toInvoiceEvent,
   toInvoiceItem,
@@ -27,6 +30,7 @@ import {
   toPayment,
   toRecurringSchedule,
   type ClientRow,
+  type ProductRow,
   type InvoiceItemRow,
   type InvoiceRow,
   type OrganizationRow,
@@ -39,6 +43,7 @@ import type {
   InvoiceInput,
   OrganizationSettingsInput,
   PaymentInput,
+  ProductInput,
   RecurringScheduleInput,
 } from "@/lib/domain/schemas";
 
@@ -217,6 +222,126 @@ const organizations: OrganizationRepo = {
 };
 
 /* --------------------------------------------------------------- Clients */
+
+const products: ProductRepo = {
+  async list(orgId, filters: ProductListFilters = {}) {
+    const supabase = createSupabaseServerClient();
+    const { from, to } = range(filters.page, filters.pageSize);
+
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("org_id", orgId)
+      .order("name", { ascending: true })
+      .range(from, to);
+
+    if (!filters.includeArchived) query = query.is("archived_at", null);
+    if (filters.search) {
+      const pattern = `%${filters.search}%`;
+      query = query.or(`name.ilike.${pattern},barcode.ilike.${pattern}`);
+    }
+
+    const { data, error, count } = await query;
+    if (error) raise(error, "lecture des produits");
+
+    return { rows: (data ?? []).map((row) => toProduct(row as ProductRow)), total: count ?? 0 };
+  },
+
+  async get(orgId, productId) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("org_id", orgId)
+      .eq("id", productId)
+      .maybeSingle();
+
+    if (error) raise(error, "lecture du produit");
+    return data ? toProduct(data as ProductRow) : null;
+  },
+
+  async findByBarcode(orgId, barcode) {
+    const code = barcode.trim();
+    if (!code) return null;
+
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("org_id", orgId)
+      .eq("barcode", code)
+      // Les archivés sont exclus : on retire un article du catalogue pour qu'il
+      // cesse d'être vendu, un scan ne doit pas le ressusciter.
+      .is("archived_at", null)
+      .maybeSingle();
+
+    if (error) raise(error, "recherche par code-barres");
+    return data ? toProduct(data as ProductRow) : null;
+  },
+
+  async create(orgId, input: ProductInput) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("products")
+      .insert({
+        org_id: orgId,
+        name: input.name,
+        unit_price: input.unitPrice,
+        tax_rate: input.taxRate,
+        barcode: input.barcode ?? null,
+        unit: input.unit ?? null,
+        notes: input.notes ?? null,
+      })
+      .select("*")
+      .single();
+
+    if (error) raise(error, "création du produit");
+    return toProduct(data as ProductRow);
+  },
+
+  async update(orgId, productId, input: ProductInput) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("products")
+      .update({
+        name: input.name,
+        unit_price: input.unitPrice,
+        tax_rate: input.taxRate,
+        barcode: input.barcode ?? null,
+        unit: input.unit ?? null,
+        notes: input.notes ?? null,
+      })
+      .eq("org_id", orgId)
+      .eq("id", productId)
+      .select("*")
+      .single();
+
+    if (error) raise(error, "modification du produit");
+    return toProduct(data as ProductRow);
+  },
+
+  async archive(orgId, productId) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+      .from("products")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("org_id", orgId)
+      .eq("id", productId);
+
+    if (error) raise(error, "archivage du produit");
+  },
+
+  async restore(orgId, productId) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+      .from("products")
+      .update({ archived_at: null })
+      .eq("org_id", orgId)
+      .eq("id", productId);
+
+    if (error) raise(error, "restauration du produit");
+  },
+};
 
 const clients: ClientRepo = {
   async list(orgId, filters: ClientListFilters = {}) {
@@ -837,6 +962,7 @@ const recurring: RecurringRepo = {
 export const supabaseRepositories: Repositories = {
   organizations,
   clients,
+  products,
   invoices,
   payments,
   recurring,

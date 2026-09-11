@@ -19,6 +19,8 @@ import {
   type Paginated,
   type PaymentListFilters,
   type PaymentRepo,
+  type ProductListFilters,
+  type ProductRepo,
   type RecurringRepo,
   type Repositories,
 } from "@/lib/data/repository";
@@ -38,6 +40,7 @@ import type {
   IsoDate,
   Organization,
   Payment,
+  Product,
   RecurringSchedule,
   UUID,
 } from "@/lib/domain/types";
@@ -46,6 +49,7 @@ import type {
   InvoiceInput,
   OrganizationSettingsInput,
   PaymentInput,
+  ProductInput,
   RecurringScheduleInput,
 } from "@/lib/domain/schemas";
 
@@ -195,6 +199,90 @@ const organizations: OrganizationRepo = {
 };
 
 /* --------------------------------------------------------------- Clients */
+
+const products: ProductRepo = {
+  async list(orgId, filters: ProductListFilters = {}) {
+    const search = filters.search?.trim().toLowerCase();
+
+    const rows = getMockDb()
+      .products.filter((product) => product.orgId === orgId)
+      .filter((product) => (filters.includeArchived ? true : product.archivedAt === null))
+      .filter((product) =>
+        search
+          ? product.name.toLowerCase().includes(search) ||
+            (product.barcode?.toLowerCase().includes(search) ?? false)
+          : true,
+      )
+      .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+
+    return paginate(rows, filters.page, filters.pageSize);
+  },
+
+  async get(orgId, productId) {
+    return (
+      getMockDb().products.find(
+        (product) => product.id === productId && product.orgId === orgId,
+      ) ?? null
+    );
+  },
+
+  async findByBarcode(orgId, barcode) {
+    const code = barcode.trim();
+    if (!code) return null;
+
+    // Les archivés sont exclus : on retire un article du catalogue pour qu'il
+    // cesse d'être vendu, un scan ne doit pas le ressusciter.
+    return (
+      getMockDb().products.find(
+        (product) =>
+          product.orgId === orgId && product.archivedAt === null && product.barcode === code,
+      ) ?? null
+    );
+  },
+
+  async create(orgId, input: ProductInput) {
+    const product: Product = {
+      id: mockId(),
+      orgId,
+      name: input.name,
+      unitPrice: input.unitPrice,
+      taxRate: input.taxRate,
+      barcode: input.barcode ?? null,
+      unit: input.unit ?? null,
+      notes: input.notes ?? null,
+      archivedAt: null,
+      createdAt: now(),
+    };
+    getMockDb().products.push(product);
+    return product;
+  },
+
+  async update(orgId, productId, input: ProductInput) {
+    const product = await products.get(orgId, productId);
+    if (!product) throw new NotFoundError("Produit");
+    Object.assign(product, {
+      name: input.name,
+      unitPrice: input.unitPrice,
+      taxRate: input.taxRate,
+      barcode: input.barcode ?? null,
+      unit: input.unit ?? null,
+      notes: input.notes ?? null,
+    });
+    return product;
+  },
+
+  async archive(orgId, productId) {
+    const product = await products.get(orgId, productId);
+    if (!product) throw new NotFoundError("Produit");
+    product.archivedAt = now();
+  },
+
+  async restore(orgId, productId) {
+    const product = await products.get(orgId, productId);
+    if (!product) throw new NotFoundError("Produit");
+    product.archivedAt = null;
+  },
+};
 
 const clients: ClientRepo = {
   async list(orgId, filters: ClientListFilters = {}) {
@@ -753,6 +841,7 @@ const recurring: RecurringRepo = {
 export const mockRepositories: Repositories = {
   organizations,
   clients,
+  products,
   invoices,
   payments,
   recurring,
