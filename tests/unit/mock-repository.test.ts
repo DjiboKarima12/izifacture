@@ -4,7 +4,8 @@ import { mockRepositories } from "@/lib/data/mock";
 import { DEMO_ORG_ID, DEMO_USER_ID, getMockDb, resetMockDb } from "@/lib/data/mock/seed";
 import { DomainError } from "@/lib/data/repository";
 import { computeTotals } from "@/lib/tax";
-import { todayIso } from "@/lib/dates";
+import { addMonths, todayIso } from "@/lib/dates";
+import { monthBounds, resolvePlan } from "@/lib/plan";
 import { deriveDisplayStatus } from "@/lib/status";
 import type { InvoiceInput } from "@/lib/domain/schemas";
 
@@ -76,7 +77,7 @@ describe("issue", () => {
     expect(issued.number).toMatch(/^FAC-\d{4}-\d{4}$/);
     expect(issued.status).toBe("sent");
     expect(issued.snapshot?.organization.name).toBe("Atelier Sahel");
-    expect(issued.snapshot?.client.name).toBe(getMockDb().clients[0]!.name);
+    expect(issued.snapshot?.client?.name).toBe(getMockDb().clients[0]!.name);
     expect(issued.sentAt).not.toBeNull();
   });
 
@@ -99,14 +100,14 @@ describe("issue", () => {
   it("gèle le snapshot : modifier le client après émission ne change pas la facture", async () => {
     const draft = await invoices.createDraft(DEMO_ORG_ID, draftInput(), null);
     const issued = await invoices.issue(DEMO_ORG_ID, draft.id);
-    const originalName = issued.snapshot!.client.name;
+    const originalName = issued.snapshot!.client!.name;
 
-    await clients.update(DEMO_ORG_ID, draft.clientId, {
+    await clients.update(DEMO_ORG_ID, draft.clientId!, {
       name: "Nouvelle raison sociale",
     } as never);
 
     const reloaded = await invoices.get(DEMO_ORG_ID, draft.id);
-    expect(reloaded!.snapshot!.client.name).toBe(originalName);
+    expect(reloaded!.snapshot!.client!.name).toBe(originalName);
   });
 
   it("refuse d'émettre deux fois", async () => {
@@ -168,7 +169,7 @@ describe("encaissements", () => {
 
     await payments.record(
       DEMO_ORG_ID,
-      { invoiceId: issued.id, amount: 100_000, paidAt: todayIso(), method: "mobile_money", reference: null, note: null },
+      { invoiceId: issued.id, amount: 100_000, paidAt: todayIso(), method: "my_nita", reference: null, note: null },
       DEMO_USER_ID,
     );
 
@@ -320,5 +321,63 @@ describe("clients", () => {
     const { rows } = await clients.list(DEMO_ORG_ID, { search: "telecoms" });
     expect(rows).toHaveLength(1);
     expect(rows[0]!.name).toBe("Niger Telecoms");
+  });
+});
+
+describe("comptage pour le quota mensuel", () => {
+  const { from, to } = monthBounds();
+
+  it("ne compte pas un brouillon", async () => {
+    const before = await invoices.countIssuedBetween(DEMO_ORG_ID, from, to);
+    await invoices.createDraft(DEMO_ORG_ID, draftInput(), DEMO_USER_ID);
+
+    expect(await invoices.countIssuedBetween(DEMO_ORG_ID, from, to)).toBe(before);
+  });
+
+  it("compte une facture au moment de son émission", async () => {
+    const before = await invoices.countIssuedBetween(DEMO_ORG_ID, from, to);
+    const draft = await invoices.createDraft(DEMO_ORG_ID, draftInput(), DEMO_USER_ID);
+    await invoices.issue(DEMO_ORG_ID, draft.id);
+
+    expect(await invoices.countIssuedBetween(DEMO_ORG_ID, from, to)).toBe(before + 1);
+  });
+
+  /**
+   * Un devis ne prouve aucune vente : le faire entrer dans le quota
+   * reviendrait à faire payer un prospect qui n'a encore rien acheté.
+   */
+  it("ne compte pas un devis émis", async () => {
+    const before = await invoices.countIssuedBetween(DEMO_ORG_ID, from, to);
+    const quote = await invoices.createDraft(
+      DEMO_ORG_ID,
+      draftInput({ type: "quote" }),
+      DEMO_USER_ID,
+    );
+    await invoices.issue(DEMO_ORG_ID, quote.id);
+
+    expect(await invoices.countIssuedBetween(DEMO_ORG_ID, from, to)).toBe(before);
+  });
+
+  /**
+   * Le quota se remet à zéro chaque mois : une facture émise aujourd'hui ne
+   * doit rien ajouter au compte d'un mois écoulé, sans quoi le compteur ne
+   * repartirait jamais.
+   */
+  it("n'ajoute rien au compte d'un mois déjà écoulé", async () => {
+    const passe = monthBounds(addMonths(todayIso(), -2));
+
+    const passeAvant = await invoices.countIssuedBetween(DEMO_ORG_ID, passe.from, passe.to);
+    const moisAvant = await invoices.countIssuedBetween(DEMO_ORG_ID, from, to);
+
+    const draft = await invoices.createDraft(DEMO_ORG_ID, draftInput(), DEMO_USER_ID);
+    await invoices.issue(DEMO_ORG_ID, draft.id);
+
+    expect(await invoices.countIssuedBetween(DEMO_ORG_ID, passe.from, passe.to)).toBe(passeAvant);
+    expect(await invoices.countIssuedBetween(DEMO_ORG_ID, from, to)).toBe(moisAvant + 1);
+  });
+
+  it("part d'un plan gratuit sur l'organisation de démonstration", async () => {
+    const subscription = await mockRepositories.organizations.getSubscription(DEMO_ORG_ID);
+    expect(resolvePlan(subscription.plan, subscription.status)).toBe("free");
   });
 });

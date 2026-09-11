@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle, Phone, MapPin } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
@@ -7,24 +7,47 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Aide et Support" };
 
+/**
+ * Canaux de support.
+ *
+ * Un numéro et une adresse email en texte brut obligent l'utilisateur à les
+ * recopier à la main — sur téléphone, là où cette page est le plus consultée,
+ * c'est le geste le plus pénible qui soit. Chaque canal joignable porte donc son
+ * `href` : `wa.me` ouvre la conversation WhatsApp, `tel:` déclenche l'appel,
+ * `mailto:` le brouillon. L'adresse postale, elle, n'est qu'une information.
+ */
 const CHANNELS = [
   {
     icon: MessageCircle,
     title: "WhatsApp",
-    detail: "+221 77 000 00 00",
-    description: "Le plus rapide, du lundi au samedi de 8h à 20h.",
+    detail: "+227 89 35 35 00",
+    href: "https://wa.me/22789353500",
+    external: true,
+    description: "Le plus rapide, du lundi au samedi de 9h à 20h.",
   },
   {
     icon: Mail,
     title: "Email",
-    detail: "support@izifacture.com",
+    detail: "barketechnologie@gmail.com",
+    href: "mailto:barketechnologie@gmail.com",
+    external: false,
     description: "Réponse sous 24 heures ouvrées.",
   },
   {
     icon: Phone,
     title: "Téléphone",
-    detail: "+221 33 000 00 00",
+    detail: "+227 89 35 35 00",
+    href: "tel:+22789353500",
+    external: false,
     description: "Du lundi au vendredi, 9h à 18h.",
+  },
+  {
+    icon: MapPin,
+    title: "Adresse",
+    detail: "Niamey, Niger",
+    href: null,
+    external: false,
+    description: "Siège social de Barke Technologie.",
   },
 ];
 
@@ -36,7 +59,11 @@ export default function SupportPage() {
         description="Une question sur une facture, la TVA ou votre abonnement ? Écrivez-nous."
       />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      {/*
+        Deux colonnes, pas quatre : sur 900 px de large, quatre cartes laissaient
+        200 px par carte et l'adresse email y était coupée en plein milieu.
+      */}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {CHANNELS.map((channel) => (
           <Card key={channel.title} className="p-5">
             <span
@@ -46,7 +73,20 @@ export default function SupportPage() {
               <channel.icon className="size-[18px]" />
             </span>
             <p className="mt-3 font-semibold">{channel.title}</p>
-            <p className="mt-0.5 text-sm font-medium">{channel.detail}</p>
+
+            {channel.href ? (
+              <a
+                href={channel.href}
+                target={channel.external ? "_blank" : undefined}
+                rel={channel.external ? "noreferrer" : undefined}
+                className="mt-0.5 inline-block break-words rounded-md text-sm font-medium text-interactive underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {channel.detail}
+              </a>
+            ) : (
+              <p className="mt-0.5 break-words text-sm font-medium">{channel.detail}</p>
+            )}
+
             <p className="mt-1.5 text-xs text-muted-foreground">{channel.description}</p>
           </Card>
         ))}

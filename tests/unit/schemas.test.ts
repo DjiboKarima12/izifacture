@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { organizationSettingsSchema, clientInputSchema } from "@/lib/domain/schemas";
+import {
+  organizationSettingsSchema,
+  clientInputSchema,
+  invoiceInputSchema,
+} from "@/lib/domain/schemas";
 
 /**
  * Ces tests reproduisent la charge EXACTE envoyée par les formulaires.
@@ -113,5 +117,44 @@ describe("clientInputSchema", () => {
 
   it("refuse un nom trop court", () => {
     expect(clientInputSchema.safeParse({ name: "A" }).success).toBe(false);
+  });
+});
+
+describe("invoiceInputSchema · client facultatif", () => {
+  const base = {
+    type: "invoice" as const,
+    issueDate: "2026-09-11",
+    dueDate: "2026-10-11",
+    currency: "XOF" as const,
+    notes: null,
+    terms: null,
+    items: [{ description: "Attiéké", quantity: 1, unitPrice: 1000, taxRate: 18, discount: null }],
+  };
+
+  it("accepte une vente au comptoir, sans client", () => {
+    const parsed = invoiceInputSchema.safeParse({ ...base, clientId: null });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.clientId).toBeNull();
+  });
+
+  it("accepte l'absence complète du champ", () => {
+    expect(invoiceInputSchema.safeParse(base).success).toBe(true);
+  });
+
+  it("traduit la chaîne vide du formulaire en null plutôt que de la refuser", () => {
+    const parsed = invoiceInputSchema.safeParse({ ...base, clientId: "" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.clientId).toBeNull();
+  });
+
+  it("refuse toujours un identifiant qui n'est pas un UUID", () => {
+    expect(invoiceInputSchema.safeParse({ ...base, clientId: "client-42" }).success).toBe(false);
+  });
+
+  it("garde un client valide quand il est fourni", () => {
+    const id = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
+    const parsed = invoiceInputSchema.safeParse({ ...base, clientId: id });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.clientId).toBe(id);
   });
 });

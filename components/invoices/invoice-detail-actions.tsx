@@ -8,11 +8,13 @@ import {
   Ban,
   CheckCircle2,
   ChevronDown,
+  Download,
   FileMinus,
   FileOutput,
   Pencil,
   Send,
   Trash2,
+  Wallet,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +26,6 @@ import {
   createCreditNote,
   deleteInvoice,
   issueInvoice,
-  markInvoicePaid,
   type ActionResult,
 } from "@/lib/actions/invoices";
 import { cn } from "@/lib/utils";
@@ -60,6 +61,13 @@ export function InvoiceDetailActions({
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
+
+  /**
+   * L'ouverture de la saisie d'encaissement est portée ici parce que DEUX
+   * commandes y mènent : le bouton « Encaisser » et l'entrée de menu. Laisser le
+   * dialogue gérer lui-même son ouverture en interdirait la seconde.
+   */
+  const [payOpen, setPayOpen] = React.useState(false);
 
   const run = (action: () => Promise<ActionResult<unknown>>, redirectTo?: string) => {
     setError(null);
@@ -135,10 +143,18 @@ export function InvoiceDetailActions({
                 <DropdownMenu.Item
                   disabled={!isOpen || remaining === 0}
                   className={itemClasses}
-                  onSelect={() => run(() => markInvoicePaid(invoiceId))}
+                  onSelect={() => {
+                    /**
+                     * Reporté d'un tour. En se fermant, le menu rend le focus à
+                     * son déclencheur ; ouvrir le dialogue dans le même tour le
+                     * lui ferait reprendre aussitôt, et la fenêtre se
+                     * refermerait sans qu'on ait rien pu saisir.
+                     */
+                    setTimeout(() => setPayOpen(true), 0);
+                  }}
                 >
                   <CheckCircle2 className="size-4 shrink-0" aria-hidden />
-                  Marquer comme payée
+                  Encaisser le reste…
                 </DropdownMenu.Item>
               )}
 
@@ -176,8 +192,37 @@ export function InvoiceDetailActions({
           </Button>
         ) : null}
 
+        {/*
+          Ancre nue, pas un `Link` : le serveur renvoie un PDF en pièce jointe.
+          Le document sort au format ticket 80 mm sans passer par la boîte
+          d'impression, où le format papier reste un choix de l'utilisateur.
+        */}
+        <Button asChild variant="outline" size="sm">
+          <a href={`/invoices/${invoiceId}/pdf`} download>
+            <Download aria-hidden />
+            Télécharger
+          </a>
+        </Button>
+
+        {/*
+          Un seul dialogue, deux commandes : le bouton ci-dessous et l'entrée
+          « Encaisser le reste… » du menu. Il est monté en mode contrôlé, donc
+          sans son bouton intégré — celui-ci est rendu ici.
+        */}
         {isOpen && !isQuote && remaining > 0 ? (
-          <RecordPaymentDialog invoiceId={invoiceId} remaining={remaining} currency={currency} />
+          <>
+            <Button size="sm" disabled={pending} onClick={() => setPayOpen(true)}>
+              <Wallet aria-hidden />
+              Encaisser
+            </Button>
+            <RecordPaymentDialog
+              invoiceId={invoiceId}
+              remaining={remaining}
+              currency={currency}
+              open={payOpen}
+              onOpenChange={setPayOpen}
+            />
+          </>
         ) : null}
 
         {isDraft ? (

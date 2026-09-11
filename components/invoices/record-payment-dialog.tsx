@@ -10,6 +10,7 @@ import { Field, Input } from "@/components/ui/input";
 import { recordPayment } from "@/lib/actions/payments";
 import { formatAmount, parseAmountInput, type Currency } from "@/lib/money";
 import { todayIso } from "@/lib/dates";
+import { changeGiven, PAYMENT_METHOD_LABELS } from "@/lib/payments";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/domain/types";
 
 /**
@@ -18,36 +19,50 @@ import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/domain/types";
  * Les espèces sont le moyen par défaut : c'est de loin le plus courant chez les
  * utilisateurs visés, et un règlement en liquide doit se saisir sans détour.
  */
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: "Espèces",
-  mobile_money: "Mobile Money",
-  bank_transfer: "Virement bancaire",
-  cheque: "Chèque",
-  card: "Carte bancaire",
-  other: "Autre",
-};
-
 export function RecordPaymentDialog({
   invoiceId,
   remaining,
   currency,
   label = "Encaisser",
   variant = "primary",
+  open: openProp,
+  onOpenChange,
 }: {
   invoiceId: string;
   remaining: number;
   currency: Currency;
   label?: string;
   variant?: "primary" | "outline";
+  /**
+   * Ouverture pilotée de l'extérieur. Sert à déclencher la saisie depuis une
+   * entrée de menu, qui ne peut pas être un déclencheur de dialogue : le menu
+   * se ferme au clic et emporterait le dialogue avec lui.
+   *
+   * En mode contrôlé, le bouton intégré n'est PAS rendu — c'est l'appelant qui
+   * fournit le sien, sinon deux commandes ouvriraient la même fenêtre.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp : internalOpen;
+  const setOpen = React.useCallback(
+    (value: boolean) => {
+      if (!controlled) setInternalOpen(value);
+      onOpenChange?.(value);
+    },
+    [controlled, onOpenChange],
+  );
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
 
   const [amount, setAmount] = React.useState(String(remaining));
   const [paidAt, setPaidAt] = React.useState(todayIso());
   const [method, setMethod] = React.useState<PaymentMethod>("cash");
+  const [tendered, setTendered] = React.useState("");
   const [reference, setReference] = React.useState("");
 
   // Remet le formulaire à l'état initial à chaque ouverture : rouvrir après un
@@ -57,12 +72,25 @@ export function RecordPaymentDialog({
     setAmount(String(remaining));
     setPaidAt(todayIso());
     setMethod("cash");
+    setTendered("");
     setReference("");
     setError(null);
   }, [open, remaining]);
 
   const parsedAmount = parseAmountInput(amount, currency);
   const overpaying = parsedAmount !== null && parsedAmount > remaining;
+
+  /**
+   * Le billet tendu ne se demande qu'en espèces : c'est le seul moyen qui rend
+   * de la monnaie. Changer de moyen efface la saisie plutôt que de la garder
+   * cachée — un montant invisible qui part quand même en base est un piège.
+   */
+  const cash = method === "cash";
+  const parsedTendered = tendered.trim() ? parseAmountInput(tendered, currency) : null;
+  const tenderedTooLow =
+    parsedTendered !== null && parsedAmount !== null && parsedTendered < parsedAmount;
+  const change = tenderedTooLow ? null : changeGiven(parsedAmount ?? 0, parsedTendered);
+  const tenderedInvalid = tendered.trim() !== "" && parsedTendered === null;
 
   const submit = () => {
     setError(null);
@@ -72,6 +100,9 @@ export function RecordPaymentDialog({
         amount: parsedAmount ?? 0,
         paidAt,
         method,
+        // Jamais de billet tendu sur autre chose que des espèces, même si le
+        // champ a été rempli avant de changer de moyen.
+        tendered: cash ? parsedTendered : null,
         reference: reference.trim() || null,
         note: null,
       });
@@ -87,12 +118,14 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <Button size="sm" variant={variant}>
-          <Wallet aria-hidden />
-          {label}
-        </Button>
-      </Dialog.Trigger>
+      {controlled ? null : (
+        <Dialog.Trigger asChild>
+          <Button size="sm" variant={variant}>
+            <Wallet aria-hidden />
+            {label}
+          </Button>
+        </Dialog.Trigger>
+      )}
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/25 animate-overlay-in" />
@@ -104,7 +137,7 @@ export function RecordPaymentDialog({
 
           <div className="mt-5 space-y-4">
             <Field
-              label="Montant reçu"
+              label="Montant encaissé"
               htmlFor="payment-amount"
               hint={overpaying ? undefined : "Modifiable pour un règlement partiel."}
               error={
@@ -133,11 +166,51 @@ export function RecordPaymentDialog({
               >
                 {PAYMENT_METHODS.map((value) => (
                   <option key={value} value={value}>
-                    {METHOD_LABELS[value]}
+                    {PAYMENT_METHOD_LABELS[value]}
                   </option>
                 ))}
               </select>
             </Field>
+
+            {/*
+              Billet tendu et monnaie rendue. Le champ suit le moyen de paiement :
+              une carte ou un virement ne rend rien, l'afficher là inviterait à
+              saisir une donnée qui n'a pas de sens.
+
+              La monnaie n'est pas un champ mais un calcul montré en direct :
+              elle vaut `tendu - encaissé`, et un second champ à remplir serait
+              un second chiffre à contredire.
+            */}
+            {cash ? (
+              <Field
+                label="Montant remis par le client"
+                htmlFor="payment-tendered"
+                hint="Facultatif. Sert à imprimer la monnaie rendue sur le reçu."
+                error={
+                  tenderedInvalid
+                    ? "Montant invalide."
+                    : tenderedTooLow
+                      ? "Inférieur au montant encaissé."
+                      : undefined
+                }
+              >
+                <Input
+                  id="payment-tendered"
+                  inputMode="numeric"
+                  className="tabular"
+                  value={tendered}
+                  onChange={(event) => setTendered(event.target.value)}
+                  placeholder="Facultatif"
+                />
+              </Field>
+            ) : null}
+
+            {cash && change !== null ? (
+              <div className="flex items-baseline justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Monnaie à rendre</span>
+                <span className="tabular font-semibold">{formatAmount(change, currency)}</span>
+              </div>
+            ) : null}
 
             <Field label="Date du règlement" htmlFor="payment-date">
               <Input
@@ -176,7 +249,13 @@ export function RecordPaymentDialog({
             </Dialog.Close>
             <Button
               size="sm"
-              disabled={pending || parsedAmount === null || parsedAmount <= 0}
+              disabled={
+                pending ||
+                parsedAmount === null ||
+                parsedAmount <= 0 ||
+                tenderedInvalid ||
+                tenderedTooLow
+              }
               onClick={submit}
             >
               {pending ? "Enregistrement…" : "Enregistrer"}

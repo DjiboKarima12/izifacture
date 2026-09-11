@@ -186,6 +186,12 @@ const organizations: OrganizationRepo = {
   async listMembers(orgId) {
     return getMockDb().members.filter((member) => member.orgId === orgId);
   },
+
+  async getSubscription(orgId) {
+    // Pas de ligne = plan gratuit, jamais une erreur : une organisation dont
+    // l'abonnement n'a pas encore été créé doit pouvoir utiliser l'application.
+    return getMockDb().subscriptions.get(orgId) ?? { plan: "free", status: "active" };
+  },
 };
 
 /* --------------------------------------------------------------- Clients */
@@ -311,13 +317,18 @@ const invoices: InvoiceRepo = {
 
   async createDraft(orgId, input: InvoiceInput, userId) {
     const db = getMockDb();
-    const client = db.clients.find((row) => row.id === input.clientId && row.orgId === orgId);
-    if (!client) throw new NotFoundError("Client");
+
+    // Client facultatif — mais s'il est fourni, il doit exister ET appartenir à
+    // l'organisation : un identifiant inventé ne doit pas passer en silence.
+    const client = input.clientId
+      ? (db.clients.find((row) => row.id === input.clientId && row.orgId === orgId) ?? null)
+      : null;
+    if (input.clientId && !client) throw new NotFoundError("Client");
 
     const invoice: Invoice = {
       id: mockId(),
       orgId,
-      clientId: input.clientId,
+      clientId: input.clientId ?? null,
       type: input.type,
       number: null,
       status: "draft",
@@ -357,7 +368,7 @@ const invoices: InvoiceRepo = {
       );
     }
 
-    invoice.clientId = input.clientId;
+    invoice.clientId = input.clientId ?? null;
     invoice.issueDate = input.issueDate;
     invoice.dueDate = input.dueDate;
     invoice.currency = input.currency;
@@ -377,6 +388,18 @@ const invoices: InvoiceRepo = {
     db.invoices = db.invoices.filter((row) => row.id !== invoiceId);
     db.items = db.items.filter((item) => item.invoiceId !== invoiceId);
     db.events = db.events.filter((event) => event.invoiceId !== invoiceId);
+  },
+
+  async countIssuedBetween(orgId, from, to) {
+    return getMockDb().invoices.filter(
+      (invoice) =>
+        invoice.orgId === orgId &&
+        invoice.type === "invoice" &&
+        invoice.sentAt !== null &&
+        // Borne haute exclue : `to` est le 1er du mois suivant.
+        invoice.sentAt.slice(0, 10) >= from &&
+        invoice.sentAt.slice(0, 10) < to,
+    ).length;
   },
 
   async issue(orgId, invoiceId) {
@@ -632,6 +655,7 @@ const payments: PaymentRepo = {
       amount: input.amount,
       paidAt: input.paidAt,
       method: input.method,
+      tendered: input.tendered ?? null,
       reference: input.reference ?? null,
       note: input.note ?? null,
       createdBy: userId,

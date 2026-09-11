@@ -33,12 +33,22 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
  */
 export type DisplayStatus = InvoiceStatus | "overdue" | "expired";
 
+/**
+ * Les moyens par lesquels l'argent circule réellement au Niger.
+ *
+ * Nommés par leur service — MyNita, Amanata, Wave, Airtel Money — et non par des
+ * catégories génériques : personne ne dit « mobile money » au comptoir, et un
+ * libellé qu'il faut traduire mentalement finit mal choisi.
+ *
+ * L'ordre est celui du terrain : les espèces d'abord, de loin le cas courant.
+ * Il pilote la liste déroulante, donc il compte.
+ */
 export const PAYMENT_METHODS = [
   "cash",
-  "mobile_money",
-  "bank_transfer",
-  "cheque",
-  "card",
+  "my_nita",
+  "amanata",
+  "wave",
+  "airtel_money",
   "other",
 ] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
@@ -145,16 +155,24 @@ export type InvoiceSnapshot = {
     | "logoUrl"
     | "invoiceFooter"
   >;
+  /** `null` sur une vente au comptoir : il n'y avait personne à figer. */
   client: Pick<
     Client,
     "name" | "email" | "phone" | "addressLine" | "city" | "country" | "taxId"
-  >;
+  > | null;
 };
 
 export type Invoice = {
   id: UUID;
   orgId: UUID;
-  clientId: UUID;
+  /**
+   * `null` sur une vente au comptoir.
+   *
+   * Toutes les boutiques ne notent pas à qui elles vendent. Forcer un client
+   * poussait à réutiliser une fiche fourre-tout, ce qui faussait ensuite toutes
+   * les statistiques par client — le contraire du but recherché.
+   */
+  clientId: UUID | null;
   type: DocumentType;
   /** `null` tant que le document est un brouillon : le numéro s'attribue à l'émission. */
   number: string | null;
@@ -195,6 +213,16 @@ export type Payment = {
   amount: number;
   paidAt: IsoDate;
   method: PaymentMethod;
+  /**
+   * Montant remis par le client, espèces uniquement.
+   *
+   * `null` signifie « la question ne se pose pas » — un virement ou une carte
+   * ne rend pas de monnaie. Un zéro se lirait « le client n'a rien tendu », ce
+   * qui n'est pas la même chose.
+   *
+   * La monnaie rendue n'est pas stockée : elle vaut `tendered - amount`.
+   */
+  tendered: number | null;
   reference: string | null;
   note: string | null;
   createdBy: UUID | null;
@@ -220,9 +248,11 @@ export type RecurringSchedule = {
   paymentTerms: number;
   active: boolean;
   /** Lignes modèles, sans identifiants ni champs calculés. */
-  template: Array<Pick<InvoiceItem, "description" | "quantity" | "unitPrice" | "taxRate"> & {
-    discount: Discount | null;
-  }>;
+  template: Array<
+    Pick<InvoiceItem, "description" | "quantity" | "unitPrice" | "taxRate"> & {
+      discount: Discount | null;
+    }
+  >;
   createdAt: IsoTimestamp;
 };
 

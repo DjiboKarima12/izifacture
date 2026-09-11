@@ -10,6 +10,7 @@ import { RecordPaymentDialog } from "@/components/invoices/record-payment-dialog
 import { deletePayment } from "@/lib/actions/payments";
 import { formatAmount, type Currency } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
+import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
 import type { InvoiceStatus, Payment, PaymentMethod } from "@/lib/domain/types";
 
 /**
@@ -19,15 +20,6 @@ import type { InvoiceStatus, Payment, PaymentMethod } from "@/lib/domain/types";
  * un client revient compléter le solde, ou une saisie est à corriger. C'est donc
  * ici que se fait la gestion, sans jamais toucher aux lignes du document.
  */
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: "Espèces",
-  mobile_money: "Mobile Money",
-  bank_transfer: "Virement",
-  cheque: "Chèque",
-  card: "Carte",
-  other: "Autre",
-};
-
 export function PaymentsCard({
   invoiceId,
   status,
@@ -85,7 +77,7 @@ export function PaymentsCard({
                     {formatAmount(payment.amount, currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDate(payment.paidAt)} · {METHOD_LABELS[payment.method]}
+                    {formatDate(payment.paidAt)} · {PAYMENT_METHOD_LABELS[payment.method]}
                     {payment.reference ? ` · ${payment.reference}` : ""}
                   </p>
                 </div>

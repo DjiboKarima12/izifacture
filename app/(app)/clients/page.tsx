@@ -33,6 +33,8 @@ export default async function ClientsPage({
   const revenue = new Map<string, number>();
   for (const invoice of invoices) {
     if (invoice.status === "draft" || invoice.status === "cancelled") continue;
+    // Une vente au comptoir n'a pas de client : elle ne s'impute à personne.
+    if (!invoice.clientId) continue;
     revenue.set(invoice.clientId, (revenue.get(invoice.clientId) ?? 0) + invoice.total);
   }
 

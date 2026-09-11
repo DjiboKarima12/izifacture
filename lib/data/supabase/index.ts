@@ -133,6 +133,7 @@ const organizations: OrganizationRepo = {
         quote_prefix: input.quotePrefix.toUpperCase(),
         credit_note_prefix: input.creditNotePrefix.toUpperCase(),
         invoice_footer: input.invoiceFooter ?? null,
+        logo_url: input.logoUrl ?? null,
       })
       .eq("id", orgId)
       .select("*")
@@ -195,6 +196,23 @@ const organizations: OrganizationRepo = {
       email: "",
       fullName: fullNames.get(member.user_id) ?? null,
     }));
+  },
+
+  async getSubscription(orgId) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("plan, status")
+      .eq("org_id", orgId)
+      .maybeSingle();
+
+    if (error) raise(error, "lecture de l'abonnement");
+
+    // Ligne absente = plan gratuit. La table est en lecture seule pour
+    // l'application (cf. RLS) : seul le service role y écrit, donc un
+    // utilisateur ne peut pas s'attribuer un plan payant.
+    const row = (data ?? null) as { plan: string; status: string } | null;
+    return row ?? { plan: "free", status: "active" };
   },
 };
 
@@ -414,7 +432,7 @@ const invoices: InvoiceRepo = {
       .from("invoices")
       .insert({
         org_id: orgId,
-        client_id: input.clientId,
+        client_id: input.clientId ?? null,
         type: input.type,
         status: "draft",
         issue_date: input.issueDate,
@@ -466,7 +484,7 @@ const invoices: InvoiceRepo = {
     const { error } = await supabase
       .from("invoices")
       .update({
-        client_id: input.clientId,
+        client_id: input.clientId ?? null,
         issue_date: input.issueDate,
         due_date: input.dueDate,
         currency: input.currency,
@@ -493,6 +511,23 @@ const invoices: InvoiceRepo = {
 
     if (error) raise(error, "suppression du brouillon");
     if (!count) throw new DomainError("Seul un brouillon peut être supprimé.");
+  },
+
+  async countIssuedBetween(orgId, from, to) {
+    const supabase = createSupabaseServerClient();
+    const { count, error } = await supabase
+      .from("invoices")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", orgId)
+      .eq("type", "invoice")
+      .not("sent_at", "is", null)
+      .gte("sent_at", from)
+      // Borne haute EXCLUE : `to` est le 1er du mois suivant, donc une facture
+      // émise le dernier jour à 23 h 59 reste comptée dans son mois.
+      .lt("sent_at", to);
+
+    if (error) raise(error, "comptage des factures émises");
+    return count ?? 0;
   },
 
   /** Numérotation, snapshot et statut : une seule transaction, côté base. */
@@ -688,6 +723,7 @@ const payments: PaymentRepo = {
         amount: input.amount,
         paid_at: input.paidAt,
         method: input.method,
+        tendered: input.tendered ?? null,
         reference: input.reference ?? null,
         note: input.note ?? null,
         created_by: userId,

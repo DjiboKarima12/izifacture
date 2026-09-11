@@ -8,6 +8,7 @@ import { CheckCircle2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Field, Input, Textarea } from "@/components/ui/input";
+import { LogoPicker } from "@/components/settings/logo-picker";
 import { updateOrganization } from "@/lib/actions/organization";
 import type { Organization } from "@/lib/domain/types";
 
@@ -56,6 +57,7 @@ export function OrganizationForm({
       quotePrefix: organization.quotePrefix,
       creditNotePrefix: organization.creditNotePrefix,
       invoiceFooter: organization.invoiceFooter ?? "",
+      logoUrl: organization.logoUrl ?? "",
     }),
     [organization],
   );
@@ -83,6 +85,8 @@ export function OrganizationForm({
         ...form,
         defaultTaxRate: Number(form.defaultTaxRate.replace(",", ".")),
         defaultPaymentTerms: Number(form.defaultPaymentTerms),
+        // Le formulaire porte "" pour « rien » ; le schéma attend null.
+        logoUrl: form.logoUrl || null,
       });
 
       if (!result.ok) {
@@ -269,6 +273,17 @@ export function OrganizationForm({
                     onChange={set("invoiceFooter")}
                   />
                 </Field>
+
+                <div className="sm:col-span-3">
+                  <p className="mb-2 text-sm font-medium">Logo du reçu</p>
+                  <LogoPicker
+                    value={form.logoUrl || null}
+                    disabled={pending}
+                    onChange={(next) =>
+                      setForm((current) => ({ ...current, logoUrl: next ?? "" }))
+                    }
+                  />
+                </div>
               </CardContent>
             </Card>
           ) : null}

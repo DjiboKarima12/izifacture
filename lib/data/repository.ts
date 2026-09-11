@@ -89,6 +89,15 @@ export interface OrganizationRepo {
   listForUser(userId: UUID): Promise<Organization[]>;
   update(orgId: UUID, input: OrganizationSettingsInput): Promise<Organization>;
   listMembers(orgId: UUID): Promise<Array<Membership & { email: string; fullName: string | null }>>;
+
+  /**
+   * Abonnement de l'organisation, tel qu'il est stocké.
+   *
+   * Renvoie les valeurs brutes : c'est `resolvePlan()` qui décide ce qu'elles
+   * valent, et lui seul. Une organisation sans ligne d'abonnement est traitée
+   * comme gratuite plutôt que comme une erreur.
+   */
+  getSubscription(orgId: UUID): Promise<{ plan: string; status: string }>;
 }
 
 export interface ClientRepo {
@@ -119,6 +128,15 @@ export interface InvoiceRepo {
   createCreditNote(orgId: UUID, invoiceId: UUID, userId: UUID | null): Promise<InvoiceWithItems>;
   /** Transforme un devis accepté en facture. */
   convertQuoteToInvoice(orgId: UUID, quoteId: UUID, userId: UUID | null): Promise<InvoiceWithItems>;
+
+  /**
+   * Nombre de FACTURES émises dans `[from, to[`, pour le quota du plan gratuit.
+   *
+   * Compte l'horodatage d'émission posé par le serveur, jamais la date
+   * d'émission saisie : celle-ci se choisit, et pourrait être antidatée pour
+   * repasser sous le quota. Les devis et les avoirs sont exclus (cf. `lib/plan`).
+   */
+  countIssuedBetween(orgId: UUID, from: IsoDate, to: IsoDate): Promise<number>;
 
   listEvents(orgId: UUID, invoiceId: UUID): Promise<InvoiceEvent[]>;
   stats(orgId: UUID, reference?: IsoDate): Promise<DashboardStats>;

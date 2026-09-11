@@ -6,10 +6,18 @@ import { ArrowLeft } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { InvoiceDetailActions } from "@/components/invoices/invoice-detail-actions";
 import { PaymentsCard } from "@/components/invoices/payments-card";
-import { PrintOnMount } from "@/components/invoices/print-on-mount";
+import { PrintPageSize } from "@/components/invoices/print-page-size";
+import { ReceiptCard } from "@/components/invoices/receipt-card";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
@@ -19,13 +27,7 @@ import { deriveDisplayStatus } from "@/lib/status";
 import { amountDue } from "@/lib/tax";
 export const metadata: Metadata = { title: "Facture" };
 
-export default async function InvoiceDetailPage({
-  params,
-  searchParams,
-}: {
-  params: { id: string };
-  searchParams: { print?: string };
-}) {
+export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
   const session = await getSession();
   const invoice = await repositories.invoices.get(session.orgId, params.id);
 
@@ -65,10 +67,43 @@ export default async function InvoiceDetailPage({
     taxBreakdown: [...taxBuckets.values()].sort((a, b) => a.rate - b.rate),
   };
 
+  /**
+   * Le ticket, construit une seule fois et rendu DEUX fois : dans la carte
+   * « Reçu » à l'écran, et dans la copie dédiée à l'impression. Deux blocs JSX
+   * séparés finiraient par diverger, et le client recevrait autre chose que ce
+   * qu'on lui a montré.
+   */
+  const receipt = (
+    <InvoicePreview
+      issuer={issuer}
+      client={client}
+      currency={currency}
+      type={invoice.type}
+      number={invoice.number ?? "Brouillon"}
+      issueDate={invoice.issueDate}
+      dueDate={invoice.dueDate}
+      lines={invoice.items.map((item) => ({
+        id: item.id,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        taxRate: item.taxRate,
+        lineSubtotal: item.lineSubtotal,
+        lineTotal: item.lineTotal,
+      }))}
+      totals={storedTotals}
+      notes={invoice.notes ?? ""}
+      amountPaid={invoice.amountPaid}
+      payments={payments.map((payment) => ({
+        method: payment.method,
+        amount: payment.amount,
+        tendered: payment.tendered,
+      }))}
+    />
+  );
+
   return (
     <PageShell className="pt-0">
-      {searchParams.print === "1" ? <PrintOnMount /> : null}
-
       <Link
         href="/invoices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground print:hidden"
@@ -77,7 +112,7 @@ export default async function InvoiceDetailPage({
         Retour aux factures
       </Link>
 
-      <div className="mt-4 flex flex-col gap-4 print:hidden sm:flex-row sm:items-start sm:justify-between">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between print:hidden">
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="tabular text-xl font-bold tracking-tight">
@@ -104,31 +139,21 @@ export default async function InvoiceDetailPage({
         Feuille imprimée : le document seul, et rien d'autre.
         L'interface d'écran (5 cartes empilées, sans en-tête d'entreprise)
         débordait sur trois pages et ne ressemblait pas à une facture.
+
+        Il reste dans le flux, écrasé par `h-0 overflow-hidden` : masqué par
+        `hidden`, sa hauteur vaudrait zéro et la page imprimée retomberait
+        en A4, faute de mesure.
       */}
-      <div className="hidden print:block">
-        <InvoicePreview
-          issuer={issuer}
-          client={client}
-          currency={currency}
-          type={invoice.type}
-          number={invoice.number ?? "Brouillon"}
-          issueDate={invoice.issueDate}
-          dueDate={invoice.dueDate}
-          lines={invoice.items.map((item) => ({
-            id: item.id,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxRate: item.taxRate,
-            lineSubtotal: item.lineSubtotal,
-            lineTotal: item.lineTotal,
-          }))}
-          totals={storedTotals}
-          notes={invoice.notes ?? ""}
-        />
+      <PrintPageSize targetId="invoice-document" />
+      <div
+        id="invoice-document"
+        aria-hidden
+        className="h-0 overflow-hidden print:h-auto print:overflow-visible"
+      >
+        {receipt}
       </div>
 
-      <div className="mt-5 grid gap-4 print:hidden lg:grid-cols-3">
+      <div className="mt-5 grid gap-4 lg:grid-cols-3 print:hidden">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-4">
             <h2 className="text-base font-semibold">Lignes</h2>
@@ -230,6 +255,13 @@ export default async function InvoiceDetailPage({
             remaining={remaining}
             currency={currency}
           />
+
+          {/*
+            Placé JUSTE APRÈS les encaissements : c'est là qu'on regarde après
+            avoir saisi un versement, et le reçu qu'on redonne au client en
+            porte aussitôt le nouveau reste dû.
+          */}
+          <ReceiptCard invoiceId={invoice.id}>{receipt}</ReceiptCard>
 
           {events.length > 0 ? (
             <Card>

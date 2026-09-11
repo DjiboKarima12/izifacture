@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 
+import { isValidLogo } from "@/lib/domain/logo";
 import { CURRENCIES, MAX_AMOUNT, MIN_AMOUNT } from "@/lib/money";
 import { isIsoDate } from "@/lib/dates";
 import {
@@ -120,7 +121,17 @@ export type InvoiceItemInput = z.infer<typeof invoiceItemInputSchema>;
 
 export const invoiceInputSchema = z
   .object({
-    clientId: uuidSchema,
+    /**
+     * Facultatif : une vente au comptoir n'a pas de client nommé.
+     *
+     * La chaîne vide devient `null` plutôt que d'être refusée — c'est ce qu'un
+     * champ de formulaire laissé vide envoie, et le serveur doit accepter
+     * l'entrée telle que le navigateur la produit.
+     */
+    clientId: uuidSchema
+      .nullable()
+      .optional()
+      .or(z.literal("").transform(() => null)),
     type: z.enum(DOCUMENT_TYPES).default("invoice"),
     issueDate: isoDateSchema,
     dueDate: isoDateSchema,
@@ -141,18 +152,56 @@ export type InvoiceInput = z.infer<typeof invoiceInputSchema>;
 
 /* ------------------------------------------------------------ Paiements */
 
-export const paymentInputSchema = z.object({
-  invoiceId: uuidSchema,
-  amount: amountSchema.refine((value) => value > 0, {
-    message: "Le montant encaissé doit être supérieur à zéro",
-  }),
-  paidAt: isoDateSchema,
-  method: z.enum(PAYMENT_METHODS),
-  reference: optionalText(120),
-  note: optionalText(1000),
-});
+export const paymentInputSchema = z
+  .object({
+    invoiceId: uuidSchema,
+    amount: amountSchema.refine((value) => value > 0, {
+      message: "Le montant encaissé doit être supérieur à zéro",
+    }),
+    paidAt: isoDateSchema,
+    method: z.enum(PAYMENT_METHODS),
+    /**
+     * Montant remis par le client. Facultatif : il ne se saisit qu'en espèces,
+     * et rien n'oblige à le noter.
+     */
+    tendered: amountSchema.nullable().optional(),
+    reference: optionalText(120),
+    note: optionalText(1000),
+  })
+  .refine((input) => input.tendered == null || input.tendered >= input.amount, {
+    message: "Le montant reçu ne peut pas être inférieur au montant encaissé",
+    path: ["tendered"],
+  });
 
 export type PaymentInput = z.infer<typeof paymentInputSchema>;
+
+/**
+ * Règlement encaissé au moment même de l'émission — la vente au comptoir.
+ *
+ * Sa PRÉSENCE vaut « payée » : pas de booléen `paid` à tenir cohérent avec le
+ * reste. Absent, la facture part impayée.
+ *
+ * Aucun montant n'y figure. Ce qui est encaissé, c'est le total du document, et
+ * ce total est recalculé par le serveur depuis les lignes — le laisser passer
+ * par le navigateur rouvrirait précisément ce que la règle 2 interdit.
+ */
+export const invoiceSettlementSchema = z.object({
+  method: z.enum(PAYMENT_METHODS),
+  /**
+   * Ce que le client a DONNÉ — un seul chiffre, dont tout se déduit : ce qui est
+   * encaissé, la monnaie à rendre, le reste dû.
+   *
+   * Peut être inférieur au total : c'est un acompte, pas une erreur. Peut lui
+   * être supérieur en espèces : c'est un billet, et la différence se rend.
+   *
+   * `null` vaut « le compte juste » — le cas courant, qui ne mérite pas qu'on
+   * retape le total. Le total, lui, ne transite jamais par le navigateur : le
+   * serveur le recalcule depuis les lignes avant de borner l'encaissement.
+   */
+  received: amountSchema.nullable().optional(),
+});
+
+export type InvoiceSettlementInput = z.infer<typeof invoiceSettlementSchema>;
 
 /* --------------------------------------------------------- Organisation */
 
@@ -175,6 +224,20 @@ export const organizationSettingsSchema = z.object({
     .trim()
     .regex(/^[A-Za-z0-9-]{1,8}$/, "1 à 8 caractères (A-Z, 0-9, -)"),
   invoiceFooter: optionalText(1000),
+  /**
+   * Image encodée dans la valeur, jamais une adresse : le PDF est fabriqué par
+   * le serveur, et une URL fournie par l'utilisateur lui ferait émettre une
+   * requête vers la destination de son choix (SSRF). Voir `lib/domain/logo`.
+   */
+  logoUrl: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((value) => (value ? value : null))
+    .refine((value) => value === null || isValidLogo(value), {
+      message: "Logo invalide : image PNG, JPEG ou WebP de moins de 48 Ko.",
+    }),
 });
 
 export type OrganizationSettingsInput = z.infer<typeof organizationSettingsSchema>;

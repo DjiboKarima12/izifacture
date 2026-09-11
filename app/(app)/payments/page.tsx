@@ -12,20 +12,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
 import { formatAmount, parseAmountInput } from "@/lib/money";
+import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
 import { formatDate, isIsoDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Encaissements" };
-
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: "Espèces",
-  mobile_money: "Mobile Money",
-  bank_transfer: "Virement",
-  cheque: "Chèque",
-  card: "Carte",
-  other: "Autre",
-};
 
 type SearchParams = {
   q?: string;
@@ -112,7 +104,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
                 <option value="">Tous</option>
                 {PAYMENT_METHODS.map((value) => (
                   <option key={value} value={value}>
-                    {METHOD_LABELS[value]}
+                    {PAYMENT_METHOD_LABELS[value]}
                   </option>
                 ))}
               </select>
@@ -219,7 +211,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
                     </TableCell>
                     <TableCell>{payment.client?.name ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {METHOD_LABELS[payment.method]}
+                      {PAYMENT_METHOD_LABELS[payment.method]}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {payment.reference ?? "—"}

@@ -121,6 +121,7 @@ export type PaymentRow = {
   amount: number;
   paid_at: string;
   method: PaymentMethod;
+  tendered: number | null;
   reference: string | null;
   note: string | null;
   created_by: string | null;
@@ -266,6 +267,8 @@ export function toPayment(row: PaymentRow): Payment {
     amount: row.amount,
     paidAt: row.paid_at,
     method: row.method,
+    // `bigint` peut revenir en chaîne selon le pilote ; `null` doit rester `null`.
+    tendered: row.tendered == null ? null : Number(row.tendered),
     reference: row.reference,
     note: row.note,
     createdBy: row.created_by,

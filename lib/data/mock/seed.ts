@@ -43,6 +43,8 @@ export type MockDb = {
   schedules: RecurringSchedule[];
   /** clé `orgId:type:année` → dernière séquence attribuée */
   counters: Map<string, number>;
+  /** clé `orgId` → abonnement. Absent = plan gratuit. */
+  subscriptions: Map<string, { plan: string; status: string }>;
 };
 
 const SEED = 20260812;
@@ -377,13 +379,22 @@ function buildDataset(): MockDb {
     });
 
     if (amountPaid > 0) {
+      const method = pick(["my_nita", "wave", "cash", "airtel_money"] as const);
+
       payments.push({
         id: nextId(),
         orgId,
         invoiceId,
         amount: amountPaid,
         paidAt: addDays(issueDate, randomInt(3, 25)),
-        method: pick(["mobile_money", "bank_transfer", "cash", "cheque"] as const),
+        method,
+        /**
+         * En espèces on tend rarement le compte juste : on arrondit au billet
+         * de 500 supérieur, ce qui donne au jeu de démonstration des monnaies
+         * rendues plausibles — et parfois nulles, quand le compte tombe juste.
+         * Les autres moyens ne rendent pas de monnaie, d'où `null`.
+         */
+        tendered: method === "cash" ? Math.ceil(amountPaid / 500) * 500 : null,
         reference: null,
         note: null,
         createdBy: ownerId,
@@ -451,6 +462,9 @@ function buildDataset(): MockDb {
     events,
     schedules,
     counters,
+    // L'organisation de démonstration démarre au plan gratuit : c'est le
+    // parcours qu'on veut pouvoir essayer, quota et blocage compris.
+    subscriptions: new Map([[organization.id, { plan: "free", status: "active" }]]),
   };
 }
 
