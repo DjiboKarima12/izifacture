@@ -538,6 +538,12 @@
 /* ==========================================================================
    COULEURS D'ACTION
 
+   Les sélecteurs ne sont PAS ancrés sur `:root`. Une première version écrivait
+   `:root[data-accent="teal"]`, ce qui ne teintait que l'élément racine : poser
+   l'attribut sur une pastille de la vitrine ne produisait rien, et les six
+   cartes restaient du même vert. L'attribut était bien dans le HTML — c'est la
+   règle qui ne s'y appliquait pas.
+
    Indépendantes de la palette de fond : cinq fonds × huit accents font
    quarante apparences, pour treize blocs de CSS au lieu de quarante.
 
@@ -552,7 +558,7 @@
    ========================================================================== */
 
 /* teal */
-:root[data-accent="teal"] {
+[data-accent="teal"] {
   --primary: 178 72% 26%;
   --primary-hover: 178 72% 20%;
   --primary-foreground: 0 0% 100%;
@@ -564,7 +570,8 @@
   --ring: 180 70% 38%;
 }
 
-.dark[data-accent="teal"] {
+.dark[data-accent="teal"],
+.dark [data-accent="teal"] {
   --primary: 176 55% 48%;
   --primary-hover: 176 55% 55%;
   --primary-foreground: 178 45% 8%;
@@ -577,7 +584,7 @@
 }
 
 /* bleu */
-:root[data-accent="bleu"] {
+[data-accent="bleu"] {
   --primary: 212 75% 33%;
   --primary-hover: 212 75% 27%;
   --primary-foreground: 0 0% 100%;
@@ -589,7 +596,8 @@
   --ring: 212 82% 47%;
 }
 
-.dark[data-accent="bleu"] {
+.dark[data-accent="bleu"],
+.dark [data-accent="bleu"] {
   --primary: 211 78% 58%;
   --primary-hover: 211 78% 65%;
   --primary-foreground: 212 45% 8%;
@@ -602,7 +610,7 @@
 }
 
 /* indigo */
-:root[data-accent="indigo"] {
+[data-accent="indigo"] {
   --primary: 243 55% 38%;
   --primary-hover: 243 55% 32%;
   --primary-foreground: 0 0% 100%;
@@ -614,7 +622,8 @@
   --ring: 243 66% 52%;
 }
 
-.dark[data-accent="indigo"] {
+.dark[data-accent="indigo"],
+.dark [data-accent="indigo"] {
   --primary: 243 70% 66%;
   --primary-hover: 243 70% 72%;
   --primary-foreground: 243 45% 8%;
@@ -627,7 +636,7 @@
 }
 
 /* violet */
-:root[data-accent="violet"] {
+[data-accent="violet"] {
   --primary: 280 50% 36%;
   --primary-hover: 280 50% 30%;
   --primary-foreground: 0 0% 100%;
@@ -639,7 +648,8 @@
   --ring: 280 62% 50%;
 }
 
-.dark[data-accent="violet"] {
+.dark[data-accent="violet"],
+.dark [data-accent="violet"] {
   --primary: 280 62% 66%;
   --primary-hover: 280 62% 72%;
   --primary-foreground: 280 45% 8%;
@@ -652,7 +662,7 @@
 }
 
 /* rose */
-:root[data-accent="rose"] {
+[data-accent="rose"] {
   --primary: 335 60% 33%;
   --primary-hover: 335 60% 27%;
   --primary-foreground: 0 0% 100%;
@@ -664,7 +674,8 @@
   --ring: 335 70% 46%;
 }
 
-.dark[data-accent="rose"] {
+.dark[data-accent="rose"],
+.dark [data-accent="rose"] {
   --primary: 335 68% 62%;
   --primary-hover: 335 68% 68%;
   --primary-foreground: 335 45% 8%;
@@ -677,7 +688,7 @@
 }
 
 /* ambre */
-:root[data-accent="ambre"] {
+[data-accent="ambre"] {
   --primary: 34 80% 28%;
   --primary-hover: 34 80% 22%;
   --primary-foreground: 0 0% 100%;
@@ -689,7 +700,8 @@
   --ring: 36 78% 40%;
 }
 
-.dark[data-accent="ambre"] {
+.dark[data-accent="ambre"],
+.dark [data-accent="ambre"] {
   --primary: 40 72% 52%;
   --primary-hover: 40 72% 58%;
   --primary-foreground: 34 45% 8%;
@@ -702,7 +714,7 @@
 }
 
 /* ardoise */
-:root[data-accent="ardoise"] {
+[data-accent="ardoise"] {
   --primary: 215 28% 25%;
   --primary-hover: 215 28% 19%;
   --primary-foreground: 0 0% 100%;
@@ -714,7 +726,8 @@
   --ring: 215 30% 38%;
 }
 
-.dark[data-accent="ardoise"] {
+.dark[data-accent="ardoise"],
+.dark [data-accent="ardoise"] {
   --primary: 213 22% 62%;
   --primary-hover: 213 22% 69%;
   --primary-foreground: 215 45% 8%;
