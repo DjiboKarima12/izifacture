@@ -294,6 +294,221 @@
   }
 }
 
+/* ==========================================================================
+   PALETTES AU CHOIX
+
+   Posées sur <html> par un attribut (`data-theme`), jamais par du style en
+   ligne : c'est ce qui garde toutes les couleurs dans ce fichier, comme
+   l'exige la règle 1 du design system.
+
+   Chaque palette redéfinit uniquement ce qui la distingue — fonds, texte,
+   bordures, barre latérale. Les couleurs de STATUT (payée, en retard…) et de
+   graphique restent communes : elles portent du sens, pas du goût, et les
+   changer d'un thème à l'autre rendrait le code couleur inapprenable.
+
+   Les variantes sombres suivent chaque palette. Sans elles, basculer en mode
+   sombre sur un thème clair ne changerait que la moitié des jetons, et on
+   lirait du texte clair sur un fond clair.
+   ========================================================================== */
+
+/* -------------------------------------------------------------- Ardoise */
+:root[data-theme="ardoise"] {
+  --background: 0 0% 100%;
+  --foreground: 222 30% 11%;
+  --surface: 214 20% 94%;
+  --surface-strong: 214 16% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 30% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 30% 11%;
+  --secondary: 214 18% 94%;
+  --muted: 214 20% 96%;
+  --muted-foreground: 215 12% 40%;
+  --border: 214 16% 86%;
+  --input: 214 16% 80%;
+
+  --sidebar: 220 16% 14%;
+  --sidebar-foreground: 210 20% 98%;
+  --sidebar-muted: 215 12% 65%;
+  --sidebar-active: 220 14% 23%;
+  --sidebar-border: 220 12% 26%;
+  --sidebar-mark: 158 50% 45%;
+  --sidebar-mark-foreground: 220 16% 14%;
+}
+
+.dark[data-theme="ardoise"] {
+  --background: 220 18% 11%;
+  --foreground: 210 20% 96%;
+  --surface: 220 16% 14%;
+  --surface-strong: 220 14% 19%;
+  --card: 220 16% 15%;
+  --card-foreground: 210 20% 96%;
+  --popover: 220 16% 17%;
+  --popover-foreground: 210 20% 96%;
+  --secondary: 220 14% 21%;
+  --muted: 220 14% 18%;
+  --muted-foreground: 215 12% 68%;
+  --border: 220 12% 24%;
+  --input: 220 12% 28%;
+
+  --sidebar: 220 20% 8%;
+  --sidebar-foreground: 210 20% 97%;
+  --sidebar-muted: 215 10% 62%;
+  --sidebar-active: 220 16% 18%;
+  --sidebar-border: 220 14% 20%;
+  --sidebar-mark: 158 50% 48%;
+  --sidebar-mark-foreground: 220 20% 8%;
+}
+
+/* --------------------------------------------------------------- Papier */
+:root[data-theme="papier"] {
+  --background: 0 0% 100%;
+  --foreground: 60 6% 8%;
+  --surface: 45 18% 94%;
+  --surface-strong: 45 14% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 60 6% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 60 6% 8%;
+  --secondary: 45 16% 94%;
+  --muted: 45 18% 96%;
+  --muted-foreground: 45 6% 38%;
+  --border: 45 12% 85%;
+  --input: 45 12% 79%;
+
+  --sidebar: 60 3% 10%;
+  --sidebar-foreground: 45 30% 97%;
+  --sidebar-muted: 45 8% 64%;
+  --sidebar-active: 60 3% 18%;
+  --sidebar-border: 60 3% 22%;
+  /* 43 % et non 48 : à 48, le « MF » de la pastille tombait à 3,99:1, sous le
+     seuil AA. Mesuré par `npm run check:contrast`. */
+  --sidebar-mark: 18 62% 43%;
+  --sidebar-mark-foreground: 45 30% 97%;
+}
+
+.dark[data-theme="papier"] {
+  --background: 60 4% 9%;
+  --foreground: 45 20% 95%;
+  --surface: 60 4% 12%;
+  --surface-strong: 60 3% 17%;
+  --card: 60 4% 13%;
+  --card-foreground: 45 20% 95%;
+  --popover: 60 4% 15%;
+  --popover-foreground: 45 20% 95%;
+  --secondary: 60 3% 19%;
+  --muted: 60 3% 16%;
+  --muted-foreground: 45 8% 66%;
+  --border: 60 3% 22%;
+  --input: 60 3% 26%;
+
+  --sidebar: 60 5% 6%;
+  --sidebar-foreground: 45 25% 96%;
+  --sidebar-muted: 45 7% 60%;
+  --sidebar-active: 60 3% 16%;
+  --sidebar-border: 60 3% 19%;
+  --sidebar-mark: 18 62% 54%;
+  --sidebar-mark-foreground: 60 5% 6%;
+}
+
+/* --------------------------------------------------------------- Indigo */
+:root[data-theme="indigo"] {
+  --background: 0 0% 100%;
+  --foreground: 226 45% 11%;
+  --surface: 222 30% 95%;
+  --surface-strong: 222 24% 89%;
+  --card: 0 0% 100%;
+  --card-foreground: 226 45% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 226 45% 11%;
+  --secondary: 222 26% 94%;
+  --muted: 222 30% 96%;
+  --muted-foreground: 224 14% 40%;
+  --border: 222 22% 86%;
+  --input: 222 22% 80%;
+
+  --sidebar: 226 38% 15%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-muted: 224 20% 72%;
+  --sidebar-active: 226 30% 24%;
+  --sidebar-border: 226 26% 27%;
+  --sidebar-mark: 40 68% 61%;
+  --sidebar-mark-foreground: 226 38% 15%;
+}
+
+.dark[data-theme="indigo"] {
+  --background: 226 32% 10%;
+  --foreground: 222 24% 96%;
+  --surface: 226 28% 13%;
+  --surface-strong: 226 24% 18%;
+  --card: 226 28% 14%;
+  --card-foreground: 222 24% 96%;
+  --popover: 226 28% 16%;
+  --popover-foreground: 222 24% 96%;
+  --secondary: 226 24% 20%;
+  --muted: 226 24% 17%;
+  --muted-foreground: 224 14% 68%;
+  --border: 226 20% 24%;
+  --input: 226 20% 28%;
+
+  --sidebar: 226 40% 8%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-muted: 224 18% 68%;
+  --sidebar-active: 226 30% 18%;
+  --sidebar-border: 226 26% 21%;
+  --sidebar-mark: 40 68% 61%;
+  --sidebar-mark-foreground: 226 40% 8%;
+}
+
+/* ------------------------------------------------------------- Comptoir */
+:root[data-theme="comptoir"] {
+  --background: 0 0% 100%;
+  --foreground: 160 28% 10%;
+  --surface: 158 20% 94%;
+  --surface-strong: 158 16% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 28% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 28% 10%;
+  --secondary: 158 18% 93%;
+  --muted: 158 20% 96%;
+  --muted-foreground: 160 10% 36%;
+  --border: 158 14% 85%;
+  --input: 158 14% 79%;
+
+  --sidebar: 160 46% 13%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-muted: 158 18% 72%;
+  --sidebar-active: 160 36% 22%;
+  --sidebar-border: 160 32% 25%;
+  --sidebar-mark: 38 62% 58%;
+  --sidebar-mark-foreground: 160 46% 13%;
+}
+
+.dark[data-theme="comptoir"] {
+  --background: 160 26% 9%;
+  --foreground: 158 18% 95%;
+  --surface: 160 22% 12%;
+  --surface-strong: 160 18% 17%;
+  --card: 160 22% 13%;
+  --card-foreground: 158 18% 95%;
+  --popover: 160 22% 15%;
+  --popover-foreground: 158 18% 95%;
+  --secondary: 160 18% 19%;
+  --muted: 160 18% 16%;
+  --muted-foreground: 158 12% 66%;
+  --border: 160 16% 23%;
+  --input: 160 16% 27%;
+
+  --sidebar: 160 34% 7%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-muted: 158 14% 64%;
+  --sidebar-active: 160 26% 17%;
+  --sidebar-border: 160 22% 20%;
+  --sidebar-mark: 38 62% 58%;
+  --sidebar-mark-foreground: 160 34% 7%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

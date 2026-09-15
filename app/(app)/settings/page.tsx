@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Building2, FileText, Globe, Sparkles, UserRound, Users } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { AppearancePanel } from "@/components/settings/appearance-panel";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { OrganizationForm, type SettingsTab } from "@/components/settings/organization-form";
@@ -100,6 +101,10 @@ export default async function SettingsPage({
         <SettingsNav active={active} />
 
         <div className="min-w-0 space-y-5">
+          {/* Avant les membres : c'est le réglage qu'on vient chercher le plus
+              souvent, et le seul qui se voie immédiatement. */}
+          <AppearancePanel />
+
           <Card>
             <CardHeader className="pb-4">
               <h2 className="text-base font-semibold">Membres</h2>

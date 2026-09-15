@@ -28,20 +28,30 @@ const ratio = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 const paires = [
-  ["clair  · blanc sur primaire (bouton)    ", hsl(0, 0, 100), hsl(158, 64, 22)],
-  ["clair  · blanc sur primaire survolé     ", hsl(0, 0, 100), hsl(158, 64, 17)],
-  ["clair  · texte accent sur fond accent   ", hsl(158, 64, 22), hsl(152, 45, 94)],
-  ["clair  · texte atténué sur fond de page ", hsl(35, 13, 38), hsl(37, 36, 90)],
-  ["clair  · texte atténué sur une carte    ", hsl(35, 13, 38), hsl(37, 67, 98)],
-  ["clair  · texte principal sur fond de page", hsl(35, 31, 11), hsl(37, 36, 90)],
-  ["clair  · statut « payée » sur son fond  ", hsl(158, 64, 30), hsl(152, 62, 96)],
-  ["clair  · statut « en retard » sur le sien", hsl(0, 72, 49), hsl(0, 100, 97)],
-  ["barre  · nav active sur fond actif      ", hsl(38, 83, 95), hsl(29, 27, 19)],
-  ["barre  · nav au repos sur la barre      ", hsl(34, 22, 63), hsl(28, 28, 13)],
-  ["barre  · nom de marque sur la barre     ", hsl(38, 83, 95), hsl(28, 28, 13)],
-  ["barre  · pastille or sur la barre       ", hsl(36, 67, 55), hsl(28, 28, 13)],
-  ["sombre · texte sur primaire             ", hsl(224, 45, 10), hsl(158, 50, 45)],
-  ["sombre · nav au repos sur la barre      ", hsl(155, 14, 62), hsl(165, 22, 10)],
+  ["sable    · texte atténué sur fond      ", hsl(35, 13, 38), hsl(37, 36, 90)],
+  ["sable    · texte principal sur fond    ", hsl(35, 31, 11), hsl(37, 36, 90)],
+  ["sable    · nav au repos sur la barre   ", hsl(34, 22, 63), hsl(28, 28, 13)],
+  ["sable    · « MF » sur la pastille      ", hsl(28, 28, 13), hsl(36, 67, 55)],
+
+  ["ardoise  · texte atténué sur fond      ", hsl(215, 12, 40), hsl(214, 20, 94)],
+  ["ardoise  · nav au repos sur la barre   ", hsl(215, 12, 65), hsl(220, 16, 14)],
+  ["ardoise· sombre texte atténué sur fond ", hsl(215, 12, 68), hsl(220, 16, 14)],
+
+  ["papier   · texte atténué sur fond      ", hsl(45, 6, 38), hsl(45, 18, 94)],
+  ["papier   · nav au repos sur la barre   ", hsl(45, 8, 64), hsl(60, 3, 10)],
+  ["papier   · « MF » sur la pastille      ", hsl(45, 30, 97), hsl(18, 62, 43)],
+
+  ["indigo   · texte atténué sur fond      ", hsl(224, 14, 40), hsl(222, 30, 95)],
+  ["indigo   · nav au repos sur la barre   ", hsl(224, 20, 72), hsl(226, 38, 15)],
+  ["indigo   · « MF » sur la pastille      ", hsl(226, 38, 15), hsl(40, 68, 61)],
+
+  ["comptoir · texte atténué sur fond      ", hsl(160, 10, 36), hsl(158, 20, 94)],
+  ["comptoir · nav au repos sur la barre   ", hsl(158, 18, 72), hsl(160, 46, 13)],
+  ["comptoir · « MF » sur la pastille      ", hsl(160, 46, 13), hsl(38, 62, 58)],
+
+  ["commun   · blanc sur primaire (bouton) ", hsl(0, 0, 100), hsl(158, 64, 22)],
+  ["commun   · statut « payée »            ", hsl(158, 64, 30), hsl(152, 62, 96)],
+  ["commun   · statut « en retard »        ", hsl(0, 72, 49), hsl(0, 100, 97)],
 ];
 for (const [nom, fg, bg] of paires) {
   const r = ratio(fg, bg);
