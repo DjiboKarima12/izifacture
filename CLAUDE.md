@@ -92,25 +92,44 @@ npm run build         # ⚠ arrêter `npm run dev` avant : les deux écrivent da
 
 ## État
 
-Étapes 1–3 faites. Le schéma est appliqué sur le projet Supabase hébergé (13 tables, 19 fonctions,
-13 triggers, 2 vues, RLS et 28 politiques), et `NEXT_PUBLIC_DATA_SOURCE=supabase` : l'application
-lit la vraie base. Le mock reste disponible en repassant la variable à `mock`.
+Étapes 1–3 faites. Le schéma est appliqué sur le projet Supabase hébergé et `NEXT_PUBLIC_DATA_SOURCE=supabase` :
+l'application lit la vraie base. Le mock reste disponible en repassant la variable à `mock`.
 
-Toutes les migrations du dépôt sont appliquées, et le registre
-`supabase_migrations.schema_migrations` existe désormais : il était absent, le schéma initial ayant
-été posé à la main. Les huit versions y sont inscrites, donc `db push` sait où il en est au lieu de
-vouloir tout rejouer.
+Toutes les migrations du dépôt sont appliquées et inscrites dans
+`supabase_migrations.schema_migrations`. Ce registre était absent — le schéma initial avait été posé
+à la main — et a été reconstitué : `db push` sait donc où il en est au lieu de vouloir tout rejouer.
 
-Pas de Docker ici, donc pas de `supabase start` : la base locale n'existe pas et les migrations
-s'appliquent sur le projet distant. Deux chemins, aucun automatique pour l'instant :
+### Appliquer une migration
 
-- `npx supabase db push` — la CLI est installée mais ni authentifiée ni liée, et `db push` demande
-  une chaîne de connexion en port **5432** (mode session ; le 6543 est en mode transaction et
-  refuse les fonctions PL/pgSQL).
-- l'API de gestion (`POST /v1/projects/{ref}/database/migrations`, qui applique *et* inscrit la
-  version) — la lecture fonctionne avec un jeton `sbp_`, mais **toute écriture renvoie 403** sur ce
-  compte, y compris avec un jeton de compte fraîchement créé. `GET /v1/organizations` renvoie `[]`,
-  ce qui pointe vers un droit manquant sur l'organisation plutôt que sur le jeton.
+Pas de Docker ici, donc pas de `supabase start` : la base locale n'existe pas, les migrations
+s'appliquent sur le projet distant.
 
-En attendant, une migration s'applique en la collant dans l'éditeur SQL du tableau de bord, suivie
-d'un `insert` dans `supabase_migrations.schema_migrations` pour que `db push` ne la rejoue pas.
+```bash
+PW=$(cat "$USERPROFILE/.supabase/db-password")
+ENC=$(node -e "process.stdout.write(encodeURIComponent(process.argv[1]))" "$PW")
+npx supabase db push --db-url "postgresql://postgres:${ENC}@db.<ref>.supabase.co:5432/postgres"
+```
+
+**L'hôte compte, et c'est le piège.** Trois chemins existent, un seul fonctionne :
+
+| Chemin | Résultat |
+|---|---|
+| `db.<ref>.supabase.co:5432` | **fonctionne** — connexion directe, mode session, PL/pgSQL accepté |
+| `aws-1-<region>.pooler.supabase.com:5432` | authentification refusée (`28P01`), quel que soit le mot de passe |
+| `aws-1-<region>.pooler.supabase.com:6543` | se connecte, mais mode transaction : refuse les fonctions PL/pgSQL |
+
+C'est l'API de gestion qui renvoie l'hôte du pooler ; ne pas s'y fier pour `db push`. Une demi-journée
+a été perdue à croire à une erreur de mot de passe alors que seul l'hôte était faux.
+
+Le mot de passe vit dans `~/.supabase/db-password`, hors du dépôt, lisible par le seul compte de
+l'utilisateur. Il n'est **pas** consultable depuis le tableau de bord Supabase : le perdre oblige à
+le réinitialiser. L'application, elle, ne s'en sert jamais — elle passe entièrement par l'API REST
+avec les clés `anon` et `service_role`.
+
+### Ce qui reste fermé
+
+L'API de gestion (`POST /v1/projects/{ref}/database/migrations`) renverrait la version appliquée
+*et* inscrite, mais **toute écriture y renvoie 403** sur ce compte, jeton de compte neuf compris.
+`GET /v1/organizations` renvoie `[]`, ce qui pointe vers un droit manquant sur l'organisation.
+Son endpoint `/database/query` est en lecture seule : utile pour **vérifier** l'état de la base
+après une migration, jamais pour la modifier.
