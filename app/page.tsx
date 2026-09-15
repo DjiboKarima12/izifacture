@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Barcode, Check, FileText, Hash, Printer, Wallet } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
+import { Atouts } from "@/components/marketing/atouts";
 import { ReceiptDemo } from "@/components/marketing/receipt-demo";
 import { Reveal } from "@/components/marketing/reveal";
 import { Button } from "@/components/ui/button";
@@ -50,51 +51,6 @@ const DEVISE = "XOF" as const;
  * Ce ne sont PAS les couleurs de statut : elles décorent ici, et une couleur qui
  * décore d'un côté ne peut pas informer de l'autre sans perdre son sens.
  */
-const ATOUTS = [
-  {
-    icon: Barcode,
-    teinte: "teal",
-    titre: "Scannez, ne tapez plus",
-    texte:
-      "Vos articles enregistrés une fois, avec leur prix. Ensuite la douchette suffit : un bip, une ligne. Sans lecteur, le nom se complète à la frappe.",
-  },
-  {
-    icon: Wallet,
-    teinte: "ambre",
-    titre: "La monnaie, avant d'ouvrir la caisse",
-    texte:
-      "Le client donne 5 000 sur 2 950 ? Vous lisez 2 050 à rendre. Il ne donne qu'une partie ? C'est un acompte, et le reçu porte le reste dû.",
-  },
-  {
-    icon: Printer,
-    teinte: "bleu",
-    titre: "Le ticket qu'on reconnaît",
-    texte:
-      "Un reçu de 80 mm, imprimé ou en PDF, avec le code-barres du numéro. Jamais une feuille A4 aux trois quarts vide.",
-  },
-  {
-    icon: FileText,
-    teinte: "violet",
-    titre: "Du devis à la facture",
-    texte:
-      "Proposez un montant sans rien réclamer. Le devis accepté devient une facture en un clic, sans ressaisir une ligne.",
-  },
-  {
-    icon: Hash,
-    teinte: "ardoise",
-    titre: "Une numérotation qui tient",
-    texte:
-      "Chaque document reçoit son numéro à l'émission, sans trou dans la séquence, et se fige. Une erreur se corrige par un avoir, jamais en réécrivant.",
-  },
-  {
-    icon: ArrowRight,
-    teinte: "rose",
-    titre: "Vos chiffres sans cahier",
-    texte:
-      "Encaissé du mois, factures en attente, retards. Vous savez qui vous doit quoi sans feuilleter quoi que ce soit.",
-  },
-];
-
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-surface">
@@ -215,27 +171,7 @@ export default function HomePage() {
             </h2>
           </Reveal>
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {ATOUTS.map((atout, index) => (
-              <Reveal key={atout.titre} delay={(index % 3) * 80}>
-                {/* Au survol, la carte se soulève : le mouvement dit qu'elle est
-                  vivante, là où une simple ombre ne se remarque pas. */}
-                <Card className="hover:shadow-raised h-full p-6 transition-all duration-200 hover:-translate-y-1">
-                  <span
-                    data-accent={atout.teinte}
-                    className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground"
-                    aria-hidden
-                  >
-                    <atout.icon className="size-5" />
-                  </span>
-                  <h3 className="mt-5 text-base font-semibold">{atout.titre}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {atout.texte}
-                  </p>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
+          <Atouts />
         </div>
       </section>
 
