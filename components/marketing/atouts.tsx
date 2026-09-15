@@ -1,23 +1,19 @@
 import type { ReactNode } from "react";
 
-import { Card } from "@/components/ui/card";
 import { Reveal } from "@/components/marketing/reveal";
 import { cn } from "@/lib/utils";
 
 /**
- * Les atouts du produit, en grille irrégulière.
+ * Les atouts du produit.
  *
- * POURQUOI PAS SIX CARTES IDENTIQUES — une icône, un titre, un paragraphe, six
- * fois : c'est le motif le plus générique d'Internet, et il ne dit rien. L'œil
- * n'a aucune raison de s'arrêter, et le lecteur ne retient rien.
+ * POURQUOI PAS SIX BLOCS « ICÔNE + TITRE + PARAGRAPHE » — c'est le motif le plus
+ * générique d'Internet, et il ne dit rien. L'œil n'a aucune raison de s'arrêter,
+ * et le lecteur ne retient rien.
  *
- * Ici, chaque carte MONTRE son mécanisme. « La monnaie » affiche la soustraction
+ * Ici, chaque atout MONTRE son mécanisme. « La monnaie » affiche la soustraction
  * elle-même ; « la numérotation » aligne trois numéros qui se suivent ; « le
  * devis » montre le document qui en devient un autre. Une démonstration, même
  * minuscule, se retient mieux qu'une promesse.
- *
- * Les tailles varient — deux cartes doubles, quatre simples — pour que le regard
- * ait un ordre de lecture au lieu d'une grille où tout se vaut.
  */
 
 type Atout = {
@@ -25,7 +21,6 @@ type Atout = {
   titre: string;
   texte: string;
   visuel: ReactNode;
-  large?: boolean;
 };
 
 /** Barres factices d'un code-barres. Largeurs fixes : c'est un décor, pas un code. */
@@ -61,7 +56,6 @@ const ATOUTS: Atout[] = [
     titre: "Scannez, ne tapez plus",
     texte:
       "Vos articles enregistrés une fois, avec leur prix. Ensuite un bip suffit. Sans douchette, le nom se complète à la frappe.",
-    large: true,
     visuel: (
       <div className="flex flex-wrap items-center gap-4">
         <CodeBarres />
@@ -78,7 +72,8 @@ const ATOUTS: Atout[] = [
   {
     teinte: "ambre",
     titre: "La monnaie, avant d'ouvrir la caisse",
-    texte: "Il ne donne qu'une partie ? C'est un acompte, et le reçu porte le reste dû.",
+    texte:
+      "Le client donne 5 000 sur 2 950 ? Vous lisez 2 050 à rendre avant même d'ouvrir la caisse. Il ne donne qu'une partie ? C'est un acompte, et le reçu qu'il emporte porte le reste dû.",
     visuel: (
       <dl className="tabular space-y-1.5 text-sm">
         <div className="flex justify-between gap-4">
@@ -99,7 +94,8 @@ const ATOUTS: Atout[] = [
   {
     teinte: "bleu",
     titre: "Le ticket qu'on reconnaît",
-    texte: "80 mm, imprimé ou en PDF. Jamais une feuille A4 aux trois quarts vide.",
+    texte:
+      "Un reçu de 80 mm, à imprimer ou à télécharger, avec le code-barres du numéro. Jamais une feuille A4 aux trois quarts vide qu'on plie en quatre.",
     visuel: (
       // Un ticket miniature : assez pour qu'on reconnaisse la forme d'un reçu.
       <div className="w-[128px] space-y-1 rounded-lg border border-border bg-card p-2.5 shadow-card">
@@ -119,7 +115,8 @@ const ATOUTS: Atout[] = [
   {
     teinte: "violet",
     titre: "Du devis à la facture",
-    texte: "Le devis accepté devient une facture en un clic, sans ressaisir une ligne.",
+    texte:
+      "Proposez un montant sans rien réclamer. Le devis accepté devient une facture en un clic, avec son propre numéro, sans ressaisir une seule ligne.",
     visuel: (
       <div className="flex flex-wrap items-center gap-2">
         <Numero>DEV-2026-0007</Numero>
@@ -135,7 +132,6 @@ const ATOUTS: Atout[] = [
     titre: "Une numérotation qui tient",
     texte:
       "Le numéro est attribué à l'émission et le document se fige. Une erreur se corrige par un avoir, jamais en réécrivant.",
-    large: true,
     visuel: (
       <div className="flex flex-wrap items-center gap-2">
         <Numero>FAC-2026-0126</Numero>
@@ -148,7 +144,8 @@ const ATOUTS: Atout[] = [
   {
     teinte: "rose",
     titre: "Vos chiffres sans cahier",
-    texte: "Vous savez qui vous doit quoi sans rien feuilleter.",
+    texte:
+      "Encaissé du mois, factures en attente, retards. Vous savez qui vous doit quoi sans feuilleter un cahier.",
     visuel: (
       <dl className="tabular flex flex-wrap gap-x-6 gap-y-2 text-sm">
         {[
@@ -166,31 +163,55 @@ const ATOUTS: Atout[] = [
   },
 ];
 
+/**
+ * Une idée par rangée, pleine largeur, le visuel alternant gauche et droite.
+ *
+ * PLUS DE CARTES. Quatre versions successives ont empilé des boîtes dans des
+ * boîtes — bento, couleurs, animations — et aucune n'a accroché. Le problème
+ * était l'encadrement lui-même : six cartes dans une grille se regardent comme
+ * un tableau, pas comme un argument.
+ *
+ * Ici, chaque atout occupe toute la largeur et respire. L'alternance gauche /
+ * droite donne au regard un mouvement de balancier en descendant la page, là où
+ * une grille l'immobilise.
+ *
+ * Le prix est une page plus longue. C'est accepté : on fait défiler une vitrine,
+ * on ne la lit pas d'un coup d'œil.
+ */
 export function Atouts() {
   return (
-    <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-12">
       {ATOUTS.map((atout, index) => (
-        <Reveal
-          key={atout.titre}
-          delay={(index % 3) * 80}
-          className={cn(atout.large && "sm:col-span-2")}
-        >
-          <Card className="hover:shadow-raised flex h-full flex-col p-6 transition-all duration-200 hover:-translate-y-1">
+        <Reveal key={atout.titre}>
+          <div
+            className={cn(
+              "grid items-center gap-8 py-10 lg:grid-cols-2 lg:gap-16",
+              // Pas de trait au-dessus de la première : il flotterait sous le titre.
+              index > 0 && "border-t border-border",
+            )}
+          >
+            <div>
+              <h3 className="text-xl font-bold tracking-tight sm:text-2xl">{atout.titre}</h3>
+              <p className="mt-3 max-w-[46ch] leading-relaxed text-muted-foreground">
+                {atout.texte}
+              </p>
+            </div>
+
             {/*
-              Le visuel EN PREMIER, avant le titre : c'est lui qui accroche, et
-              le texte vient l'expliquer. L'ordre inverse — icône, titre,
-              paragraphe — laisse l'œil glisser sans s'arrêter.
+              `lg:order-first` une rangée sur deux : l'alternance n'a lieu qu'en
+              grand écran. Empilé sur téléphone, un visuel qui passerait tantôt
+              avant tantôt après son titre casserait l'ordre de lecture.
             */}
             <div
               data-accent={atout.teinte}
-              className="flex min-h-[86px] items-center rounded-lg bg-accent px-4 py-3 text-accent-foreground"
+              className={cn(
+                "flex min-h-[116px] items-center rounded-xl bg-accent px-6 py-5 text-accent-foreground",
+                index % 2 === 1 && "lg:order-first",
+              )}
             >
               {atout.visuel}
             </div>
-
-            <h3 className="mt-5 text-base font-semibold">{atout.titre}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{atout.texte}</p>
-          </Card>
+          </div>
         </Reveal>
       ))}
     </div>

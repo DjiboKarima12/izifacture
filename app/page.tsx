@@ -40,17 +40,6 @@ export const metadata: Metadata = {
 const PRIX_PREMIUM = 2_000;
 const DEVISE = "XOF" as const;
 
-/**
- * Une TEINTE PAR ATOUT, prise dans les accents du réglage d'apparence.
- *
- * Les six pastilles étaient du même vert pâle : six fois la même chose, aucune
- * accroche. Ces teintes-là ne sont pas inventées pour la vitrine — ce sont
- * celles que l'utilisateur peut choisir dans ses réglages, dont les contrastes
- * sont mesurés par `npm run check:contrast`.
- *
- * Ce ne sont PAS les couleurs de statut : elles décorent ici, et une couleur qui
- * décore d'un côté ne peut pas informer de l'autre sans perdre son sens.
- */
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-surface">
@@ -159,9 +148,9 @@ export default function HomePage() {
 
       {/* ============================================================ Atouts */}
       {/*
-        Fond APPUYÉ sous les cartes claires. Sur la surface ordinaire, cartes et
-        fond se distinguaient de quelques points de luminosité : la grille
-        paraissait plate et blanche. Ici elles se posent sur quelque chose.
+        Fond APPUYÉ. Sur la surface ordinaire, la section se distinguait du reste
+        de quelques points de luminosité et la page paraissait plate et blanche.
+        Ici les rangées se posent sur quelque chose.
       */}
       <section className="bg-surface-strong">
         <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
