@@ -12,6 +12,17 @@ const buttonVariants = cva(
         primary: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-card",
         secondary: "bg-secondary text-secondary-foreground hover:bg-surface-strong",
         outline: "border border-border bg-background hover:bg-muted",
+        /**
+         * Pour une action posée SUR la bande sombre — barre latérale, vitrine.
+         *
+         * `outline` y serait illisible : il peint du texte `foreground`
+         * (presque noir) sur un fond brun. Les jetons de la barre latérale
+         * existent précisément parce que cette surface inverse le contraste ;
+         * une variante qui les emploie évite de réécrire ces classes à la main
+         * à chaque endroit sombre.
+         */
+        sidebar:
+          "border border-sidebar-border bg-sidebar-active text-sidebar-foreground hover:bg-sidebar-border focus-visible:ring-offset-sidebar",
         ghost: "hover:bg-muted",
         destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
         link: "text-primary underline-offset-4 hover:underline",

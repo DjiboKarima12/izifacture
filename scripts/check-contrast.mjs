@@ -43,6 +43,14 @@ const paires = [
   ["statut   · « payée » sur son fond    ", hsl(158, 64, 30), hsl(152, 62, 96)],
   ["statut   · « en retard » sur le sien ", hsl(0, 72, 49), hsl(0, 100, 97)],
 
+  // La carte « Gratuit » de la vitrine vit sur --sidebar-active, six points
+  // plus clair que la barre elle-même. Un texte lisible sur --sidebar ne l'est
+  // pas forcément ici : l'écart au fond y est plus faible, donc on le mesure.
+  ["vitrine  · texte sur carte gratuite  ", hsl(38, 83, 95), hsl(29, 27, 19)],
+  ["vitrine  · mention sur carte gratuite", hsl(34, 22, 63), hsl(29, 27, 19)],
+  ["vitrine  · coche or sur carte gratuit", hsl(36, 67, 55), hsl(29, 27, 19)],
+  ["vitrine  · bouton sombre au survol   ", hsl(38, 83, 95), hsl(30, 28, 23)],
+
   ["clair  · vert     blanc sur le bouton ", hsl(0, 0, 100), hsl(158, 64, 22)],
   ["clair  · vert     texte sur pastille  ", hsl(158, 64, 22), hsl(152, 45, 94)],
   ["sombre · vert     texte sur le bouton ", hsl(224, 45, 10), hsl(158, 50, 45)],

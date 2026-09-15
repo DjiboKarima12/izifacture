@@ -165,24 +165,42 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================ Tarifs */}
-      <section id="tarifs" className="border-y border-border bg-background">
+      {/*
+        BANDE SOMBRE, comme le haut de la page. Deux cartes claires côte à côte
+        sur fond clair donnaient deux rectangles sans hiérarchie : rien ne disait
+        laquelle regarder, et la section entière disparaissait dans le blanc.
+
+        Ici le fond bascule sur le brun de la barre latérale, et les deux formules
+        s'y posent différemment. Le gratuit reste DANS la bande — bordé, à peine
+        détaché, il appartient au fond. Le premium en SORT : carte crème, ombre
+        portée, il flotte au-dessus. La hiérarchie passe par la profondeur, pas
+        par une bordure de marque, que le système refuse.
+
+        Le gratuit garde pour autant sa liste complète et son bouton : il est
+        discret, pas escamoté. C'est l'offre par laquelle presque tout le monde
+        entrera.
+      */}
+      <section id="tarifs" className="bg-sidebar text-sidebar-foreground">
         <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
           <Reveal>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Deux formules</h2>
-            <p className="mt-4 max-w-[52ch] text-muted-foreground">
-              Commencez gratuitement. Passez au premium le jour où votre activité le demande, pas
-              avant.
+            <h2 className="tabular max-w-[18ch] text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+              {formatAmount(PRIX_PREMIUM, DEVISE)} par mois, le jour où vous en aurez besoin.
+            </h2>
+            <p className="mt-5 max-w-[52ch] text-sidebar-muted">
+              Pas d&apos;engagement, pas de carte bancaire. Vous passez au premium quand les{" "}
+              {FREE_MONTHLY_QUOTA} factures gratuites ne suffisent plus — pas avant.
             </p>
           </Reveal>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-2">
+          <div className="mt-12 grid gap-5 lg:grid-cols-2 lg:items-start">
+            {/* ------------------------------------------------------ Gratuit */}
             <Reveal>
-              <Card className="h-full p-7">
+              <div className="h-full rounded-xl border border-sidebar-border bg-sidebar-active p-7">
                 <h3 className="text-base font-semibold">Gratuit</h3>
                 <p className="tabular mt-4 text-4xl font-bold tracking-tight">
                   {formatAmount(0, DEVISE)}
                 </p>
-                <p className="mt-1.5 text-sm text-muted-foreground">Pour toujours.</p>
+                <p className="mt-1.5 text-sm text-sidebar-muted">Pour toujours.</p>
 
                 <ul className="mt-7 space-y-3 text-sm">
                   {[
@@ -193,21 +211,26 @@ export default function HomePage() {
                     "Clients, encaissements, tableau de bord",
                   ].map((ligne) => (
                     <li key={ligne} className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-status-paid" aria-hidden />
+                      {/*
+                        L'or de la marque, et non le vert des statuts : sur le
+                        brun, ce vert-là tombe sous le seuil de lisibilité.
+                      */}
+                      <Check className="mt-0.5 size-4 shrink-0 text-sidebar-mark" aria-hidden />
                       {ligne}
                     </li>
                   ))}
                 </ul>
 
-                <Button asChild variant="outline" className="mt-8 w-full">
-                  <Link href="/signup">Commencer</Link>
+                <Button asChild variant="sidebar" className="mt-8 w-full">
+                  <Link href="/signup">Commencer gratuitement</Link>
                 </Button>
-              </Card>
+              </div>
             </Reveal>
 
+            {/* ------------------------------------------------------ Premium */}
             <Reveal delay={80}>
-              {/* La formule payante se distingue par l'ombre, pas par une bordure
-                  colorée : une bordure de marque est refusée par le système. */}
+              {/* `shadow-raised` et rien d'autre : c'est l'ombre qui décolle la
+                  carte du fond sombre. Une bordure colorée est refusée. */}
               <Card className="shadow-raised h-full p-7">
                 <div className="flex items-center gap-3">
                   <h3 className="text-base font-semibold">Premium</h3>
@@ -249,13 +272,21 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================== Contact */}
+      {/*
+        CE BLOC ÉTAIT SOMBRE LUI AUSSI. Depuis que les tarifs occupent une bande
+        brune pleine largeur, un second brun juste en dessous se lisait comme un
+        écho : la moitié basse de la page devenait une suite de rectangles
+        foncés, et la bande des tarifs perdait ce qui en faisait l'accent.
+
+        Le sombre reste donc réservé à deux moments — l'ouverture et le prix.
+      */}
       <section className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
         <Reveal>
-          <div className="shadow-raised rounded-xl bg-sidebar p-8 text-sidebar-foreground sm:p-12">
+          <div className="rounded-xl border border-border bg-surface p-8 shadow-card sm:p-12">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Une question avant de commencer ?
             </h2>
-            <p className="mt-4 max-w-[46ch] text-sidebar-muted">
+            <p className="mt-4 max-w-[46ch] text-muted-foreground">
               On répond sur WhatsApp, en français, depuis Niamey.
             </p>
 
@@ -266,7 +297,7 @@ export default function HomePage() {
                 { terme: "Adresse", valeur: "Niamey, Niger" },
               ].map((contact) => (
                 <div key={contact.terme}>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-sidebar-muted">
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {contact.terme}
                   </dt>
                   <dd className="mt-1.5 break-words font-medium">{contact.valeur}</dd>
