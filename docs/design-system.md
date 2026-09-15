@@ -129,6 +129,11 @@ facture en cours de rédaction ne se remet pas en scène à chaque enregistremen
 |---|---|
 | Révélation au défilement (`Reveal`) | Personne ne « découvre » un tableau de bord qu'il ouvre dix fois par jour. |
 | Animation **en boucle** (`ReceiptDemo`) | Un mouvement répété distrait quelqu'un qui travaille. Un visiteur, lui, ne travaille pas : il lui faut trois secondes pour comprendre ce que fait le produit, et le voir se faire le démontre mieux qu'un paragraphe. |
+| **Démonstrations des atouts** (`atout-demos.tsx`), en boucle elles aussi, avec `transition-[opacity,transform]` à 300 ms sur leurs éléments | Même raison, poussée d'un cran : la section prétend montrer ses mécanismes, et elle en montrait des photographies. Un calcul de monnaie se comprend en le voyant s'exécuter ; son résultat seul est une affirmation de plus. |
+
+Six boucles sur une page ne tournent **jamais ensemble**. Chaque atout occupe une rangée pleine
+largeur, donc une ou deux sont à l'écran à la fois, et l'`IntersectionObserver` arrête les autres.
+Sans cette borne, la page ressemblerait à une machine à sous.
 
 Les garde-fous restent entiers :
 
@@ -141,6 +146,10 @@ Les garde-fous restent entiers :
 
 **Interdits partout, vitrine comprise** : rotation continue, rebond, animation déclenchée par une
 saisie, et toute animation qui retarde une action de l'utilisateur.
+
+Le faisceau de la douchette (`.animate-scan`) n'est pas une exception à la rotation continue : il
+joue **une fois par passage de boucle** puis s'efface, et ce qu'il démontre est un geste — on passe
+l'article devant le lecteur. Une ligne qui balaierait sans fin serait, elle, interdite.
 
 `prefers-reduced-motion: reduce` neutralise tout, globalement, dans `globals.css`. Ce n'est pas une
 option : le mouvement déclenche des nausées chez certaines personnes.

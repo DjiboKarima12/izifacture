@@ -157,7 +157,8 @@
      * confondaient avec la surface, et l'interface paraissait plate.
      */
     --shadow-card: 0 1px 2px 0 hsl(222 24% 12% / 0.06), 0 4px 10px -2px hsl(222 24% 12% / 0.07);
-    --shadow-raised: 0 4px 8px -2px hsl(222 24% 12% / 0.08), 0 16px 32px -12px hsl(222 24% 12% / 0.16);
+    --shadow-raised:
+      0 4px 8px -2px hsl(222 24% 12% / 0.08), 0 16px 32px -12px hsl(222 24% 12% / 0.16);
   }
 
   /* Le mode sombre est prévu par le design (interrupteur en pied de sidebar). */
@@ -308,7 +309,40 @@
   }
 }
 
+/**
+ * Le faisceau de la douchette, sur la vitrine seulement.
+ *
+ * Il ne joue qu'une fois par passage de boucle et disparaît : une ligne qui
+ * balaierait sans fin serait le « rotation continue » que le système interdit
+ * partout. Ici elle démontre un geste — on passe l'article devant le lecteur —
+ * puis elle s'arrête et le résultat s'affiche.
+ */
+@keyframes scan {
+  from {
+    transform: translateX(-8%);
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(108%);
+    opacity: 0;
+  }
+}
+
 @layer utilities {
+  .animate-scan {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    border-radius: 9999px;
+    animation: scan 0.9s ease-in-out;
+  }
+
   .animate-rise-in-lg {
     animation: rise-in-lg 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
