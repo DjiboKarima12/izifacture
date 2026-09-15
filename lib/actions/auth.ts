@@ -10,6 +10,21 @@ import { emailSchema } from "@/lib/domain/schemas";
 import { completerIdentifiant } from "@/lib/members";
 import type { ActionResult } from "@/lib/actions/invoices";
 
+/**
+ * À la CONNEXION, un identifiant nu est accepté.
+ *
+ * Un caissier reçoit « majida », pas une adresse : c'est la seule chose qu'on lui
+ * a apprise à taper. On la complète en adresse interne AVANT de la valider, de
+ * sorte que le reste de la chaîne ne manipule jamais qu'une adresse.
+ *
+ * L'INSCRIPTION garde `credentialsSchema` et exige une vraie adresse : un compte
+ * qu'on crée soi-même doit pouvoir recevoir un lien de réinitialisation.
+ */
+const loginSchema = z.object({
+  email: z.string().trim().transform(completerIdentifiant).pipe(emailSchema),
+  password: z.string().min(8, "Le mot de passe doit faire au moins 8 caractères."),
+});
+
 const credentialsSchema = z.object({
   email: emailSchema,
   // 8 caractères minimum : le défaut de Supabase est 6, trop court pour une
@@ -28,7 +43,7 @@ function invalid(error: z.ZodError): ActionResult<never> {
 }
 
 export async function signIn(input: unknown): Promise<ActionResult> {
-  const parsed = credentialsSchema.safeParse(input);
+  const parsed = loginSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
 
   const supabase = createSupabaseServerClient();
