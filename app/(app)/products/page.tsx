@@ -31,6 +31,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: { q
   });
 
   const { currency, defaultTaxRate } = session.organization;
+
+  /**
+   * Un caissier lit le catalogue, il ne le modifie pas — la RLS le refuse
+   * depuis `20260915150000`. On masque donc les commandes plutôt que de les
+   * afficher pour les voir échouer au clic.
+   */
+  const peutModifier = session.role === "owner" || session.role === "admin";
   const avecCode = products.filter((product) => product.barcode !== null).length;
 
   return (
@@ -43,16 +50,18 @@ export default async function ProductsPage({ searchParams }: { searchParams: { q
             : `${total} produit${total > 1 ? "s" : ""}${avecCode > 0 ? ` · ${avecCode} avec code-barres` : ""}`
         }
         actions={
-          <ProductFormDialog
-            currency={currency}
-            defaultTaxRate={defaultTaxRate}
-            trigger={
-              <Button>
-                <Plus aria-hidden />
-                Nouveau produit
-              </Button>
-            }
-          />
+          peutModifier ? (
+            <ProductFormDialog
+              currency={currency}
+              defaultTaxRate={defaultTaxRate}
+              trigger={
+                <Button>
+                  <Plus aria-hidden />
+                  Nouveau produit
+                </Button>
+              }
+            />
+          ) : undefined
         }
       />
 
@@ -111,17 +120,23 @@ export default async function ProductsPage({ searchParams }: { searchParams: { q
                     </TableCell>
 
                     <TableCell className="pr-4 text-right">
-                      <ProductFormDialog
-                        product={product}
-                        currency={currency}
-                        defaultTaxRate={defaultTaxRate}
-                        trigger={
-                          <Button variant="outline" size="sm" aria-label={`Modifier ${product.name}`}>
-                            <Pencil aria-hidden />
-                            Modifier
-                          </Button>
-                        }
-                      />
+                      {peutModifier ? (
+                        <ProductFormDialog
+                          product={product}
+                          currency={currency}
+                          defaultTaxRate={defaultTaxRate}
+                          trigger={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              aria-label={`Modifier ${product.name}`}
+                            >
+                              <Pencil aria-hidden />
+                              Modifier
+                            </Button>
+                          }
+                        />
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}

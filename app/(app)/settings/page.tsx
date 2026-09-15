@@ -33,11 +33,25 @@ type TabId = (typeof TABS)[number]["id"];
 
 const ROLE_LABELS = { owner: "Propriétaire", admin: "Administrateur", member: "Membre" };
 
-function SettingsNav({ active }: { active: TabId }) {
+/**
+ * Un caissier ne voit que l'APPARENCE.
+ *
+ * Les autres sections lui sont refusées par la RLS : il ouvrait le formulaire de
+ * l'entreprise, modifiait un champ, et l'enregistrement échouait. Montrer une
+ * porte qui ne s'ouvre pas est pire que ne pas la montrer.
+ *
+ * L'apparence, elle, reste accessible à tous : c'est un réglage de son propre
+ * appareil, qui ne touche ni l'entreprise ni ses collègues.
+ */
+function onglets(peutGerer: boolean) {
+  return peutGerer ? TABS : TABS.filter((tab) => tab.id === "apparence");
+}
+
+function SettingsNav({ active, peutGerer }: { active: TabId; peutGerer: boolean }) {
   return (
     <nav aria-label="Sections des paramètres">
       <ul className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
-        {TABS.map((tab) => {
+        {onglets(peutGerer).map((tab) => {
           const isActive = tab.id === active;
           return (
             <li key={tab.id} className="shrink-0 lg:shrink">
@@ -72,9 +86,16 @@ export default async function SettingsPage({
 }) {
   const session = await getSession();
 
-  const active: TabId = TABS.some((tab) => tab.id === searchParams.tab)
+  const peutGerer = session.role === "owner" || session.role === "admin";
+
+  const demande = TABS.some((tab) => tab.id === searchParams.tab)
     ? (searchParams.tab as TabId)
     : "profil";
+
+  // Un membre qui arrive sur /settings, ou qui tape une adresse d'onglet à la
+  // main, atterrit sur l'apparence plutôt que sur un écran qu'il ne peut pas
+  // utiliser.
+  const active: TabId = peutGerer ? demande : "apparence";
 
   // Les onglets de formulaire portent leur propre en-tête : le bouton
   // « Enregistrer » y vit et dépend de l'état de saisie.
@@ -86,7 +107,7 @@ export default async function SettingsPage({
         <OrganizationForm
           organization={session.organization}
           tab={active as SettingsTab}
-          nav={<SettingsNav active={active} />}
+          nav={<SettingsNav active={active} peutGerer={peutGerer} />}
         />
       </PageShell>
     );
@@ -109,7 +130,7 @@ export default async function SettingsPage({
         </div>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <SettingsNav active={active} />
+          <SettingsNav active={active} peutGerer={peutGerer} />
           <div className="min-w-0">
             <AppearancePanel />
           </div>
@@ -133,7 +154,7 @@ export default async function SettingsPage({
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <SettingsNav active={active} />
+        <SettingsNav active={active} peutGerer={peutGerer} />
 
         <div className="min-w-0 space-y-5">
           <Card>

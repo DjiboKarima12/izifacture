@@ -24,6 +24,7 @@ import type {
   IsoDate,
   Membership,
   Organization,
+  MemberRole,
   Payment,
   PaymentMethod,
   Product,
@@ -97,6 +98,13 @@ export type PaymentListResult = {
 export interface OrganizationRepo {
   get(orgId: UUID): Promise<Organization | null>;
   listForUser(userId: UUID): Promise<Organization[]>;
+  /**
+   * Organisations de l'utilisateur AVEC son rôle dans chacune.
+   *
+   * Séparé de `listForUser` : les appelants qui ne veulent que la liste ne
+   * doivent pas avoir à ignorer un champ dont ils n'ont que faire.
+   */
+  listMembershipsForUser(userId: UUID): Promise<Array<{ organization: Organization; role: MemberRole }>>;
   update(orgId: UUID, input: OrganizationSettingsInput): Promise<Organization>;
   listMembers(orgId: UUID): Promise<Array<Membership & { email: string; fullName: string | null }>>;
 

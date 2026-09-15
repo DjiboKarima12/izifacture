@@ -37,7 +37,7 @@ import {
   type PaymentRow,
   type RecurringScheduleRow,
 } from "@/lib/data/supabase/rows";
-import type { DashboardStats, InvoiceWithItems, UUID } from "@/lib/domain/types";
+import type { DashboardStats, InvoiceWithItems, MemberRole, UUID } from "@/lib/domain/types";
 import type {
   ClientInput,
   InvoiceInput,
@@ -99,6 +99,21 @@ const organizations: OrganizationRepo = {
 
     if (error) raise(error, "lecture de l'organisation");
     return data ? toOrganization(data as OrganizationRow) : null;
+  },
+
+  async listMembershipsForUser(userId) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("memberships")
+      .select("role, organization:organizations(*)")
+      .eq("user_id", userId);
+
+    if (error) raise(error, "lecture des appartenances");
+
+    return (data ?? [])
+      .map((row) => row as unknown as { role: MemberRole; organization: OrganizationRow | null })
+      .filter((row) => row.organization !== null)
+      .map((row) => ({ organization: toOrganization(row.organization!), role: row.role }));
   },
 
   async listForUser(userId) {

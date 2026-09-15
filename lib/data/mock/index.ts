@@ -172,6 +172,16 @@ const organizations: OrganizationRepo = {
     return getMockDb().organizations.find((row) => row.id === orgId) ?? null;
   },
 
+  async listMembershipsForUser(userId) {
+    const db = getMockDb();
+    return db.members
+      .filter((row) => row.userId === userId)
+      .flatMap((row) => {
+        const organization = db.organizations.find((org) => org.id === row.orgId);
+        return organization ? [{ organization, role: row.role }] : [];
+      });
+  },
+
   async listForUser(userId) {
     const db = getMockDb();
     const orgIds = new Set(

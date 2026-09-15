@@ -6,12 +6,24 @@ import { repositories } from "@/lib/data";
 import { DEMO_ORG_ID, DEMO_USER_ID } from "@/lib/data/mock/seed";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseDataEnabled } from "@/lib/supabase/env";
-import type { Organization, UUID } from "@/lib/domain/types";
+import type { MemberRole, Organization, UUID } from "@/lib/domain/types";
 
 export type Session = {
   userId: UUID;
   orgId: UUID;
   organization: Organization;
+  /**
+   * Rôle de l'utilisateur DANS cette organisation.
+   *
+   * Porté par la session pour que l'interface n'affiche pas ce qu'elle devra
+   * refuser ensuite : un caissier voyait les Paramètres de l'entreprise, ouvrait
+   * le formulaire, modifiait un champ, et l'enregistrement échouait. Une porte
+   * qu'on montre mais qui ne s'ouvre pas est pire qu'une porte absente.
+   *
+   * Ce n'est PAS un contrôle d'accès — celui-ci vit dans la RLS. C'est de
+   * l'affichage : masquer ici sans verrouiller là serait une illusion.
+   */
+  role: MemberRole;
   user: { name: string; email: string };
 };
 
@@ -52,17 +64,20 @@ async function supabaseSession(): Promise<Session> {
 
   if (!user) redirect("/login");
 
-  const organizations = await repositories.organizations.listForUser(user.id);
-  const organization = organizations[0];
+  const appartenances = await repositories.organizations.listMembershipsForUser(user.id);
+  const appartenance = appartenances[0];
 
   // Un compte sans organisation ne peut rien faire : on l'envoie la créer
   // plutôt que d'afficher des écrans vides.
-  if (!organization) redirect("/onboarding");
+  if (!appartenance) redirect("/onboarding");
+
+  const { organization, role } = appartenance;
 
   return {
     userId: user.id,
     orgId: organization.id,
     organization,
+    role,
     user: {
       name:
         (user.user_metadata?.full_name as string | undefined) ??
@@ -85,6 +100,9 @@ async function demoSession(): Promise<Session> {
     userId: DEMO_USER_ID,
     orgId: DEMO_ORG_ID,
     organization,
+    // Le mode démonstration ouvre tout : il sert à explorer le produit, pas à
+    // simuler une hiérarchie.
+    role: owner?.role ?? "owner",
     user: {
       name: owner?.fullName ?? "Utilisateur",
       email: owner?.email ?? "",
