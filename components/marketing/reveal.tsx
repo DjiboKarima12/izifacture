@@ -68,7 +68,7 @@ export function Reveal({
   return (
     <div
       ref={bloc}
-      className={cn(etat === "cache" && "opacity-0", etat === "vu" && "animate-rise-in", className)}
+      className={cn(etat === "cache" && "opacity-0", etat === "vu" && "animate-rise-in-lg", className)}
       style={etat === "vu" && delay ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}

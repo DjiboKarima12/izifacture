@@ -286,7 +286,33 @@
   }
 }
 
+/**
+ * Entrée AMPLE, réservée à la vitrine.
+ *
+ * 20 px de montée et 420 ms, contre 8 px et 240 ms dans l'application. Le
+ * réglage discret est le bon sur un tableau de bord qu'on ouvre dix fois par
+ * jour ; sur une page qu'on découvre une seule fois, il passait inaperçu — un
+ * mouvement qu'on ne remarque pas ne sert à rien.
+ *
+ * Une pointe d'agrandissement (0,98 → 1) donne l'impression que le bloc arrive
+ * vers le lecteur plutôt qu'il ne glisse : c'est ce qui accroche l'œil.
+ */
+@keyframes rise-in-lg {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @layer utilities {
+  .animate-rise-in-lg {
+    animation: rise-in-lg 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
   .animate-rise-in {
     /* `backwards` : l'élément reste invisible pendant son délai d'attente.
        Sans ça, une tuile décalée s'affiche, disparaît, puis s'anime. */

@@ -100,10 +100,12 @@ Trois mouvements, pas un de plus.
 | `transition-colors` | défaut (150 ms) | **Tout** changement d'état au survol ou au focus. |
 
 | `animate-rise-in` | 240 ms `ease-out` | Entrée du contenu au chargement d'une page. Opacité + 8 px de montée. |
+| `animate-rise-in-lg` | 420 ms | **Vitrine uniquement.** Opacité + 20 px + un soupçon d'agrandissement. Le réglage discret passe inaperçu sur une page qu'on ne voit qu'une fois. |
 
 Cas particuliers admis : `transition-transform` sur le curseur d'un `Switch`,
 `transition-opacity` sur les barres du graphique au survol, `transition-shadow` sur une carte
-survolable.
+survolable, et `hover:-translate-y-1` sur les cartes de la **vitrine** — une ombre seule ne se
+remarque pas, alors qu'un déplacement dit que l'élément est vivant.
 
 **`animate-rise-in` est un amendement**, demandé par le propriétaire du produit le 11 septembre 2026.
 La version précédente de cette règle interdisait toute animation d'entrée sur du contenu de page —

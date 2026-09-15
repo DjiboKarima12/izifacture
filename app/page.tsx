@@ -39,39 +39,56 @@ export const metadata: Metadata = {
 const PRIX_PREMIUM = 2_000;
 const DEVISE = "XOF" as const;
 
+/**
+ * Une TEINTE PAR ATOUT, prise dans les accents du réglage d'apparence.
+ *
+ * Les six pastilles étaient du même vert pâle : six fois la même chose, aucune
+ * accroche. Ces teintes-là ne sont pas inventées pour la vitrine — ce sont
+ * celles que l'utilisateur peut choisir dans ses réglages, dont les contrastes
+ * sont mesurés par `npm run check:contrast`.
+ *
+ * Ce ne sont PAS les couleurs de statut : elles décorent ici, et une couleur qui
+ * décore d'un côté ne peut pas informer de l'autre sans perdre son sens.
+ */
 const ATOUTS = [
   {
     icon: Barcode,
+    teinte: "teal",
     titre: "Scannez, ne tapez plus",
     texte:
       "Vos articles enregistrés une fois, avec leur prix. Ensuite la douchette suffit : un bip, une ligne. Sans lecteur, le nom se complète à la frappe.",
   },
   {
     icon: Wallet,
+    teinte: "ambre",
     titre: "La monnaie, avant d'ouvrir la caisse",
     texte:
       "Le client donne 5 000 sur 2 950 ? Vous lisez 2 050 à rendre. Il ne donne qu'une partie ? C'est un acompte, et le reçu porte le reste dû.",
   },
   {
     icon: Printer,
+    teinte: "bleu",
     titre: "Le ticket qu'on reconnaît",
     texte:
       "Un reçu de 80 mm, imprimé ou en PDF, avec le code-barres du numéro. Jamais une feuille A4 aux trois quarts vide.",
   },
   {
     icon: FileText,
+    teinte: "violet",
     titre: "Du devis à la facture",
     texte:
       "Proposez un montant sans rien réclamer. Le devis accepté devient une facture en un clic, sans ressaisir une ligne.",
   },
   {
     icon: Hash,
+    teinte: "ardoise",
     titre: "Une numérotation qui tient",
     texte:
       "Chaque document reçoit son numéro à l'émission, sans trou dans la séquence, et se fige. Une erreur se corrige par un avoir, jamais en réécrivant.",
   },
   {
     icon: ArrowRight,
+    teinte: "rose",
     titre: "Vos chiffres sans cahier",
     texte:
       "Encaissé du mois, factures en attente, retards. Vous savez qui vous doit quoi sans feuilleter quoi que ce soit.",
@@ -185,28 +202,40 @@ export default function HomePage() {
       </div>
 
       {/* ============================================================ Atouts */}
-      <section className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
-        <Reveal>
-          <h2 className="max-w-[20ch] text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-            Tout ce qu&apos;une caisse doit faire. Rien de plus.
-          </h2>
-        </Reveal>
+      {/*
+        Fond APPUYÉ sous les cartes claires. Sur la surface ordinaire, cartes et
+        fond se distinguaient de quelques points de luminosité : la grille
+        paraissait plate et blanche. Ici elles se posent sur quelque chose.
+      */}
+      <section className="bg-surface-strong">
+        <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
+          <Reveal>
+            <h2 className="max-w-[20ch] text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+              Tout ce qu&apos;une caisse doit faire. Rien de plus.
+            </h2>
+          </Reveal>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {ATOUTS.map((atout, index) => (
-            <Reveal key={atout.titre} delay={(index % 3) * 80}>
-              <Card className="h-full p-6 transition-shadow hover:shadow-raised">
-                <span
-                  className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground"
-                  aria-hidden
-                >
-                  <atout.icon className="size-5" />
-                </span>
-                <h3 className="mt-5 text-base font-semibold">{atout.titre}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{atout.texte}</p>
-              </Card>
-            </Reveal>
-          ))}
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {ATOUTS.map((atout, index) => (
+              <Reveal key={atout.titre} delay={(index % 3) * 80}>
+                {/* Au survol, la carte se soulève : le mouvement dit qu'elle est
+                  vivante, là où une simple ombre ne se remarque pas. */}
+                <Card className="hover:shadow-raised h-full p-6 transition-all duration-200 hover:-translate-y-1">
+                  <span
+                    data-accent={atout.teinte}
+                    className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground"
+                    aria-hidden
+                  >
+                    <atout.icon className="size-5" />
+                  </span>
+                  <h3 className="mt-5 text-base font-semibold">{atout.titre}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {atout.texte}
+                  </p>
+                </Card>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -216,8 +245,8 @@ export default function HomePage() {
           <Reveal>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Deux formules</h2>
             <p className="mt-4 max-w-[52ch] text-muted-foreground">
-              Commencez gratuitement. Passez au premium le jour où votre activité le demande,
-              pas avant.
+              Commencez gratuitement. Passez au premium le jour où votre activité le demande, pas
+              avant.
             </p>
           </Reveal>
 
@@ -254,7 +283,7 @@ export default function HomePage() {
             <Reveal delay={80}>
               {/* La formule payante se distingue par l'ombre, pas par une bordure
                   colorée : une bordure de marque est refusée par le système. */}
-              <Card className="h-full p-7 shadow-raised">
+              <Card className="shadow-raised h-full p-7">
                 <div className="flex items-center gap-3">
                   <h3 className="text-base font-semibold">Premium</h3>
                   <span className="rounded-md bg-accent px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-accent-foreground">
@@ -297,7 +326,7 @@ export default function HomePage() {
       {/* =========================================================== Contact */}
       <section className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
         <Reveal>
-          <div className="rounded-xl bg-sidebar p-8 text-sidebar-foreground shadow-raised sm:p-12">
+          <div className="shadow-raised rounded-xl bg-sidebar p-8 text-sidebar-foreground sm:p-12">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Une question avant de commencer ?
             </h2>
@@ -326,7 +355,9 @@ export default function HomePage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-[1120px] flex-col gap-3 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:px-6">
           <Logo />
-          <p className="sm:ml-auto">Facturation pour les commerces d&apos;Afrique de l&apos;Ouest.</p>
+          <p className="sm:ml-auto">
+            Facturation pour les commerces d&apos;Afrique de l&apos;Ouest.
+          </p>
         </div>
       </footer>
     </div>
