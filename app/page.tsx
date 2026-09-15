@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Barcode, Check, FileText, Hash, Printer, Wallet } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
-import { InvoicePreview } from "@/components/invoices/invoice-preview";
+import { ReceiptDemo } from "@/components/marketing/receipt-demo";
 import { Reveal } from "@/components/marketing/reveal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -78,16 +78,7 @@ const ATOUTS = [
   },
 ];
 
-const DEMO_LIGNES = [
-  { id: "1", description: "Attiéké poisson", quantity: 2, unitPrice: 1_500, taxRate: 19 },
-  { id: "2", description: "Jus de bissap", quantity: 2, unitPrice: 500, taxRate: 19 },
-];
-
 export default function HomePage() {
-  const sousTotal = DEMO_LIGNES.reduce((somme, ligne) => somme + ligne.quantity * ligne.unitPrice, 0);
-  const tva = Math.round(sousTotal * 0.19);
-  const total = sousTotal + tva;
-
   return (
     <div className="min-h-screen bg-surface">
       {/* ==================================================== Bande sombre */}
@@ -160,47 +151,13 @@ export default function HomePage() {
             </div>
 
             {/*
-              Le VRAI composant du produit, incliné et décollé du fond : ce que
-              le visiteur regarde est exactement ce que son client recevra. Une
-              capture retouchée promettrait autre chose que ce qu'on livre.
+              Le ticket se fabrique sous les yeux du visiteur, en boucle. C'est
+              le VRAI composant du produit à chaque étape, pas une vidéo : ce
+              qu'on regarde se construire est exactement ce que le client
+              recevra.
             */}
             <Reveal delay={180} className="mx-auto w-full max-w-[300px] lg:mx-0">
-              <div className="rotate-2 shadow-raised transition-transform hover:rotate-0">
-                <InvoicePreview
-                  issuer={{
-                    name: "MaMa'S Food",
-                    legalName: null,
-                    email: null,
-                    phone: "+227 89 35 35 00",
-                    addressLine: null,
-                    city: "Niamey",
-                    country: "Niger",
-                    taxId: null,
-                    invoiceFooter: "Merci Karima !",
-                    logoUrl: null,
-                  }}
-                  client={null}
-                  currency={DEVISE}
-                  number="FAC-2026-0128"
-                  issueDate="2026-09-15"
-                  dueDate="2026-09-15"
-                  lines={DEMO_LIGNES.map((ligne) => ({
-                    ...ligne,
-                    lineSubtotal: ligne.quantity * ligne.unitPrice,
-                    lineTotal: Math.round(ligne.quantity * ligne.unitPrice * 1.19),
-                  }))}
-                  totals={{
-                    subtotal: sousTotal,
-                    discountTotal: 0,
-                    taxTotal: tva,
-                    total,
-                    taxBreakdown: [{ rate: 19, base: sousTotal, tax: tva }],
-                  }}
-                  notes=""
-                  amountPaid={total}
-                  payments={[{ method: "cash", amount: total, tendered: 5_000 }]}
-                />
-              </div>
+              <ReceiptDemo currency={DEVISE} />
             </Reveal>
           </div>
         </section>

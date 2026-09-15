@@ -28,7 +28,8 @@ Les huit règles qu'on enfreint le plus souvent, à connaître sans ouvrir le do
 5. **Ombres** : `shadow-card` (au repos) ou `shadow-raised` (flottant). Rien d'autre.
 6. **Animations** : `animate-fade-in` / `animate-overlay-in` (180 ms) pour les surfaces flottantes,
    `transition-colors` pour les états, `animate-rise-in` (240 ms) pour l'entrée du contenu au
-   chargement — au tableau de bord seulement, jamais sur un écran de saisie.
+   chargement — au tableau de bord seulement, jamais sur un écran de saisie. La **vitrine publique**
+   fait exception et admet la boucle (cf. §2 du design system).
 7. **Focus visible obligatoire** sur tout élément atteignable au clavier
    (`focus-visible:ring-2 focus-visible:ring-ring`).
 8. **Nombres à droite avec `tabular`**, texte à gauche. Une seule action `primary` par écran.

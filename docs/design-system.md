@@ -118,8 +118,27 @@ La version précédente de cette règle interdisait toute animation d'entrée su
 Elle ne s'applique qu'au tableau de bord, où l'on arrive. **Pas sur les écrans de saisie** : une
 facture en cours de rédaction ne se remet pas en scène à chaque enregistrement.
 
-**Interdits** : rotation, rebond, durée supérieure à 250 ms, animation en boucle hors indicateur de
-chargement, et toute animation déclenchée par une saisie.
+### La vitrine publique fait exception
+
+**Amendement du 15 septembre 2026, demandé par le propriétaire du produit.** La page d'accueil
+(`app/page.tsx` et `components/marketing/`) admet deux choses que l'application refuse :
+
+| Autorisé sur la vitrine | Pourquoi pas dans l'application |
+|---|---|
+| Révélation au défilement (`Reveal`) | Personne ne « découvre » un tableau de bord qu'il ouvre dix fois par jour. |
+| Animation **en boucle** (`ReceiptDemo`) | Un mouvement répété distrait quelqu'un qui travaille. Un visiteur, lui, ne travaille pas : il lui faut trois secondes pour comprendre ce que fait le produit, et le voir se faire le démontre mieux qu'un paragraphe. |
+
+Les garde-fous restent entiers :
+
+- `prefers-reduced-motion` **arrête la boucle** et montre l'état final. Ce n'est pas une préférence
+  esthétique : le mouvement répété déclenche des nausées chez certaines personnes.
+- Le contenu est **visible par défaut**. `Reveal` ne masque qu'après le montage, et seulement ce qui
+  est hors de vue : sans JavaScript — connexion coupée en route, le cas courant sur les réseaux
+  visés — la page reste entièrement lisible.
+- Aucune couleur n'est inventée pour la vitrine : elle emprunte les jetons de la barre latérale.
+
+**Interdits partout, vitrine comprise** : rotation continue, rebond, animation déclenchée par une
+saisie, et toute animation qui retarde une action de l'utilisateur.
 
 `prefers-reduced-motion: reduce` neutralise tout, globalement, dans `globals.css`. Ce n'est pas une
 option : le mouvement déclenche des nausées chez certaines personnes.
