@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, FileText, Globe, Sparkles, UserRound, Users } from "lucide-react";
+import { Building2, FileText, Globe, Palette, Sparkles, UserRound, Users } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { AppearancePanel } from "@/components/settings/appearance-panel";
@@ -23,6 +23,7 @@ const TABS = [
   { id: "regional", label: "Régional & Devise", icon: Globe },
   { id: "modeles", label: "Modèles de facturation", icon: FileText },
   { id: "equipe", label: "Équipe & Accès", icon: Users },
+  { id: "apparence", label: "Apparence", icon: Palette },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -74,7 +75,9 @@ export default async function SettingsPage({
 
   // Les onglets de formulaire portent leur propre en-tête : le bouton
   // « Enregistrer » y vit et dépend de l'état de saisie.
-  if (active !== "equipe") {
+  // `equipe` et `apparence` ne sont pas des onglets du formulaire d'organisation :
+  // ils ont leur propre contenu.
+  if (active !== "equipe" && active !== "apparence") {
     return (
       <PageShell className="max-w-[1040px] pt-0">
         <OrganizationForm
@@ -82,6 +85,32 @@ export default async function SettingsPage({
           tab={active as SettingsTab}
           nav={<SettingsNav active={active} />}
         />
+      </PageShell>
+    );
+  }
+
+  /**
+   * L'apparence a sa propre section, comme les autres réglages.
+   *
+   * Elle vivait au-dessus des membres, dans l'onglet Équipe : deux sujets sans
+   * rapport sur le même écran, et un réglage qu'on ne pensait pas à chercher là.
+   */
+  if (active === "apparence") {
+    return (
+      <PageShell className="max-w-[1040px] pt-0">
+        <div className="space-y-1">
+          <h1 className="text-xl font-bold tracking-tight">Paramètres</h1>
+          <p className="text-sm text-muted-foreground">
+            Gérez les configurations générales de votre espace de travail.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <SettingsNav active={active} />
+          <div className="min-w-0">
+            <AppearancePanel />
+          </div>
+        </div>
       </PageShell>
     );
   }
@@ -101,10 +130,6 @@ export default async function SettingsPage({
         <SettingsNav active={active} />
 
         <div className="min-w-0 space-y-5">
-          {/* Avant les membres : c'est le réglage qu'on vient chercher le plus
-              souvent, et le seul qui se voie immédiatement. */}
-          <AppearancePanel />
-
           <Card>
             <CardHeader className="pb-4">
               <h2 className="text-base font-semibold">Membres</h2>

@@ -56,12 +56,83 @@ export const SCALE_LABELS: Record<TextScale, string> = {
   125: "Très grand",
 };
 
+/**
+ * Couleur d'action, indépendante du fond.
+ *
+ * Séparée de la palette pour multiplier les combinaisons sans multiplier les
+ * jeux de couleurs à maintenir : cinq fonds × huit accents font quarante
+ * apparences, avec treize blocs de CSS au lieu de quarante.
+ *
+ * PAS DE ROUGE. Il est pris par `destructive` et par le statut « en retard » :
+ * un bouton d'action rouge ferait hésiter avant chaque clic, et c'est exactement
+ * ce qu'une couleur d'alerte doit provoquer — ailleurs.
+ */
+export const ACCENTS = [
+  "vert",
+  "teal",
+  "bleu",
+  "indigo",
+  "violet",
+  "rose",
+  "ambre",
+  "ardoise",
+] as const;
+export type Accent = (typeof ACCENTS)[number];
+
+export const ACCENT_LABELS: Record<Accent, string> = {
+  vert: "Vert",
+  teal: "Turquoise",
+  bleu: "Bleu",
+  indigo: "Indigo",
+  violet: "Violet",
+  rose: "Rose",
+  ambre: "Ambre",
+  ardoise: "Ardoise",
+};
+
+/**
+ * Police de l'interface.
+ *
+ * Quatre familles, chacune pour une raison :
+ *  - Inter : neutre, la référence d'origine ;
+ *  - Outfit : plus ronde, plus chaleureuse ;
+ *  - Source Serif : empattements, pour qui trouve les sans-serif froides ;
+ *  - Atkinson Hyperlegible : dessinée pour la basse vision — lettres rendues
+ *    dissemblables exprès, ce qui la rend précieuse sur un écran au soleil.
+ *
+ * La police du REÇU ne change pas : il reste en chasse fixe, parce que c'est
+ * ce qui aligne les montants et ce que l'œil reconnaît comme un ticket.
+ */
+export const FONTS = ["inter", "outfit", "serif", "lisible"] as const;
+export type Font = (typeof FONTS)[number];
+
+export const FONT_LABELS: Record<Font, string> = {
+  inter: "Neutre",
+  outfit: "Ronde",
+  serif: "Classique",
+  lisible: "Lisibilité renforcée",
+};
+
+export const FONT_DESCRIPTIONS: Record<Font, string> = {
+  inter: "La police d'origine. Sobre et dense.",
+  outfit: "Plus ronde, plus chaleureuse.",
+  serif: "Avec empattements, comme un document imprimé.",
+  lisible: "Conçue pour la basse vision et la lecture en plein soleil.",
+};
+
 export type Appearance = {
   theme: Theme;
+  accent: Accent;
+  font: Font;
   textScale: TextScale;
 };
 
-export const DEFAULT_APPEARANCE: Appearance = { theme: "sable", textScale: 100 };
+export const DEFAULT_APPEARANCE: Appearance = {
+  theme: "sable",
+  accent: "vert",
+  font: "inter",
+  textScale: 100,
+};
 
 /** Clé de stockage local. Nommée d'après le produit, pas d'après la marque. */
 export const APPEARANCE_KEY = "mamafacture-appearance";
@@ -72,6 +143,14 @@ function isTheme(value: unknown): value is Theme {
 
 function isScale(value: unknown): value is TextScale {
   return typeof value === "number" && (TEXT_SCALES as readonly number[]).includes(value);
+}
+
+function isAccent(value: unknown): value is Accent {
+  return typeof value === "string" && (ACCENTS as readonly string[]).includes(value);
+}
+
+function isFont(value: unknown): value is Font {
+  return typeof value === "string" && (FONTS as readonly string[]).includes(value);
 }
 
 /**
@@ -88,9 +167,11 @@ export function parseAppearance(raw: string | null | undefined): Appearance {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return DEFAULT_APPEARANCE;
 
-    const { theme, textScale } = parsed as Record<string, unknown>;
+    const { theme, accent, font, textScale } = parsed as Record<string, unknown>;
     return {
       theme: isTheme(theme) ? theme : DEFAULT_APPEARANCE.theme,
+      accent: isAccent(accent) ? accent : DEFAULT_APPEARANCE.accent,
+      font: isFont(font) ? font : DEFAULT_APPEARANCE.font,
       textScale: isScale(textScale) ? textScale : DEFAULT_APPEARANCE.textScale,
     };
   } catch {

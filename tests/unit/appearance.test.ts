@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ACCENTS,
+  ACCENT_LABELS,
   DEFAULT_APPEARANCE,
+  FONTS,
+  FONT_LABELS,
   parseAppearance,
   serializeAppearance,
   TEXT_SCALES,
@@ -17,8 +21,27 @@ describe("parseAppearance", () => {
   });
 
   it("relit ce qui a été écrit", () => {
-    const voulu = { theme: "indigo" as const, textScale: 125 as const };
+    const voulu = {
+      theme: "indigo" as const,
+      accent: "ambre" as const,
+      font: "serif" as const,
+      textScale: 125 as const,
+    };
     expect(parseAppearance(serializeAppearance(voulu))).toEqual(voulu);
+  });
+
+  it("une préférence partielle complète le reste par les défauts", () => {
+    const lu = parseAppearance('{"accent":"violet"}');
+    expect(lu.accent).toBe("violet");
+    expect(lu.theme).toBe(DEFAULT_APPEARANCE.theme);
+    expect(lu.font).toBe(DEFAULT_APPEARANCE.font);
+  });
+
+  it("un accent ou une police inconnus sont ignorés isolément", () => {
+    const lu = parseAppearance('{"accent":"fuchsia","font":"comic","theme":"papier"}');
+    expect(lu.accent).toBe(DEFAULT_APPEARANCE.accent);
+    expect(lu.font).toBe(DEFAULT_APPEARANCE.font);
+    expect(lu.theme).toBe("papier");
   });
 
   it("un JSON illisible ne laisse pas l'écran sans couleurs", () => {
@@ -55,9 +78,20 @@ describe("catalogue des réglages", () => {
     for (const scale of TEXT_SCALES) expect(SCALE_LABELS[scale]).toBeTruthy();
   });
 
+  it("chaque accent et chaque police ont un libellé", () => {
+    for (const accent of ACCENTS) expect(ACCENT_LABELS[accent]).toBeTruthy();
+    for (const font of FONTS) expect(FONT_LABELS[font]).toBeTruthy();
+  });
+
   it("le défaut fait partie des choix proposés", () => {
     expect(THEMES).toContain(DEFAULT_APPEARANCE.theme);
+    expect(ACCENTS).toContain(DEFAULT_APPEARANCE.accent);
+    expect(FONTS).toContain(DEFAULT_APPEARANCE.font);
     expect(TEXT_SCALES).toContain(DEFAULT_APPEARANCE.textScale);
+  });
+
+  it("aucun accent rouge : la couleur est prise par « en retard »", () => {
+    expect(ACCENTS).not.toContain("rouge");
   });
 
   it("aucune taille sous 90 % : le reçu deviendrait illisible au téléphone", () => {

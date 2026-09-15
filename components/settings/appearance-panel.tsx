@@ -6,8 +6,13 @@ import { Check } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
+  ACCENT_LABELS,
+  ACCENTS,
   APPEARANCE_KEY,
   DEFAULT_APPEARANCE,
+  FONT_DESCRIPTIONS,
+  FONT_LABELS,
+  FONTS,
   parseAppearance,
   SCALE_LABELS,
   serializeAppearance,
@@ -56,6 +61,14 @@ export function AppearancePanel() {
      */
     if (suivant.theme === "sable") delete racine.dataset.theme;
     else racine.dataset.theme = suivant.theme;
+
+    // Même règle pour l'accent et la police : la valeur d'origine vit dans
+    // `:root`, lui poser un attribut ne correspondrait à aucune règle CSS.
+    if (suivant.accent === "vert") delete racine.dataset.accent;
+    else racine.dataset.accent = suivant.accent;
+
+    if (suivant.font === "inter") delete racine.dataset.font;
+    else racine.dataset.font = suivant.font;
 
     // 100 % = pas de style du tout : on laisse la feuille décider plutôt que de
     // figer une valeur qui deviendrait fausse si la base changeait.
@@ -118,6 +131,86 @@ export function AppearancePanel() {
               );
             })}
           </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Couleur d&apos;action
+          </legend>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Boutons, liens et sélections. Les couleurs de statut — payée, en retard — ne
+            changent pas : elles portent du sens, pas du goût.
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {ACCENTS.map((accent) => {
+              const actif = appearance.accent === accent;
+              return (
+                <button
+                  key={accent}
+                  type="button"
+                  aria-pressed={actif}
+                  onClick={() => appliquer({ accent })}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    actif ? "border-interactive bg-accent" : "border-border hover:bg-secondary",
+                  )}
+                >
+                  {/*
+                    La pastille porte l'accent RÉEL via `data-accent` : elle
+                    montre la couleur telle qu'elle s'appliquera, plutôt qu'un
+                    échantillon codé à part qui finirait par en diverger.
+                  */}
+                  <span
+                    data-accent={accent === "vert" ? undefined : accent}
+                    className="size-4 shrink-0 rounded-full bg-primary"
+                    aria-hidden
+                  />
+                  {ACCENT_LABELS[accent]}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Police
+          </legend>
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {FONTS.map((font) => {
+              const actif = appearance.font === font;
+              return (
+                <button
+                  key={font}
+                  type="button"
+                  aria-pressed={actif}
+                  onClick={() => appliquer({ font })}
+                  className={cn(
+                    "rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    actif ? "border-interactive bg-accent" : "border-border hover:bg-secondary",
+                  )}
+                >
+                  {/* Chaque libellé est écrit DANS sa police : on choisit une
+                      police en la lisant, pas en lisant son nom. */}
+                  <span data-font={font === "inter" ? undefined : font} className="block">
+                    <span className="block font-sans text-sm font-medium">
+                      {FONT_LABELS[font]}
+                    </span>
+                    <span className="block font-sans text-xs text-muted-foreground">
+                      {FONT_DESCRIPTIONS[font]}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-2 text-xs text-muted-foreground">
+            Le reçu garde sa chasse fixe : c&apos;est elle qui aligne les montants, et ce que
+            l&apos;œil reconnaît comme un ticket.
+          </p>
         </fieldset>
 
         <fieldset>

@@ -509,6 +509,220 @@
   --sidebar-mark-foreground: 160 34% 7%;
 }
 
+/* ==========================================================================
+   COULEURS D'ACTION
+
+   Indépendantes de la palette de fond : cinq fonds × huit accents font
+   quarante apparences, pour treize blocs de CSS au lieu de quarante.
+
+   « Vert » est l'accent de base et vit dans `:root` — il n'a donc pas de bloc
+   ici, comme « Sable » n'en a pas parmi les palettes.
+
+   AUCUN ROUGE. Il appartient à `destructive` et au statut « en retard » : un
+   bouton d'action rouge ferait hésiter avant chaque clic.
+
+   Les jetons de STATUT ne sont jamais touchés : « payée » reste verte même sous
+   un accent rose, sinon le code couleur deviendrait inapprenable.
+   ========================================================================== */
+
+/* teal */
+:root[data-accent="teal"] {
+  --primary: 178 72% 26%;
+  --primary-hover: 178 72% 20%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 180 70% 38%;
+  --interactive-hover: 178 72% 20%;
+  --interactive-soft: 178 44% 93%;
+  --accent: 178 44% 93%;
+  --accent-foreground: 178 72% 26%;
+  --ring: 180 70% 38%;
+}
+
+.dark[data-accent="teal"] {
+  --primary: 176 55% 48%;
+  --primary-hover: 176 55% 55%;
+  --primary-foreground: 178 45% 8%;
+  --interactive: 176 55% 48%;
+  --interactive-hover: 176 55% 55%;
+  --interactive-soft: 178 30% 20%;
+  --accent: 178 30% 20%;
+  --accent-foreground: 178 55% 80%;
+  --ring: 176 55% 48%;
+}
+
+/* bleu */
+:root[data-accent="bleu"] {
+  --primary: 212 75% 33%;
+  --primary-hover: 212 75% 27%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 212 82% 47%;
+  --interactive-hover: 212 75% 27%;
+  --interactive-soft: 210 70% 94%;
+  --accent: 210 70% 94%;
+  --accent-foreground: 212 75% 33%;
+  --ring: 212 82% 47%;
+}
+
+.dark[data-accent="bleu"] {
+  --primary: 211 78% 58%;
+  --primary-hover: 211 78% 65%;
+  --primary-foreground: 212 45% 8%;
+  --interactive: 211 78% 58%;
+  --interactive-hover: 211 78% 65%;
+  --interactive-soft: 212 30% 20%;
+  --accent: 212 30% 20%;
+  --accent-foreground: 212 55% 80%;
+  --ring: 211 78% 58%;
+}
+
+/* indigo */
+:root[data-accent="indigo"] {
+  --primary: 243 55% 38%;
+  --primary-hover: 243 55% 32%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 243 66% 52%;
+  --interactive-hover: 243 55% 32%;
+  --interactive-soft: 243 60% 95%;
+  --accent: 243 60% 95%;
+  --accent-foreground: 243 55% 38%;
+  --ring: 243 66% 52%;
+}
+
+.dark[data-accent="indigo"] {
+  --primary: 243 70% 66%;
+  --primary-hover: 243 70% 72%;
+  --primary-foreground: 243 45% 8%;
+  --interactive: 243 70% 66%;
+  --interactive-hover: 243 70% 72%;
+  --interactive-soft: 243 30% 20%;
+  --accent: 243 30% 20%;
+  --accent-foreground: 243 55% 80%;
+  --ring: 243 70% 66%;
+}
+
+/* violet */
+:root[data-accent="violet"] {
+  --primary: 280 50% 36%;
+  --primary-hover: 280 50% 30%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 280 62% 50%;
+  --interactive-hover: 280 50% 30%;
+  --interactive-soft: 280 50% 95%;
+  --accent: 280 50% 95%;
+  --accent-foreground: 280 50% 36%;
+  --ring: 280 62% 50%;
+}
+
+.dark[data-accent="violet"] {
+  --primary: 280 62% 66%;
+  --primary-hover: 280 62% 72%;
+  --primary-foreground: 280 45% 8%;
+  --interactive: 280 62% 66%;
+  --interactive-hover: 280 62% 72%;
+  --interactive-soft: 280 30% 20%;
+  --accent: 280 30% 20%;
+  --accent-foreground: 280 55% 80%;
+  --ring: 280 62% 66%;
+}
+
+/* rose */
+:root[data-accent="rose"] {
+  --primary: 335 60% 33%;
+  --primary-hover: 335 60% 27%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 335 70% 46%;
+  --interactive-hover: 335 60% 27%;
+  --interactive-soft: 335 62% 95%;
+  --accent: 335 62% 95%;
+  --accent-foreground: 335 60% 33%;
+  --ring: 335 70% 46%;
+}
+
+.dark[data-accent="rose"] {
+  --primary: 335 68% 62%;
+  --primary-hover: 335 68% 68%;
+  --primary-foreground: 335 45% 8%;
+  --interactive: 335 68% 62%;
+  --interactive-hover: 335 68% 68%;
+  --interactive-soft: 335 30% 20%;
+  --accent: 335 30% 20%;
+  --accent-foreground: 335 55% 80%;
+  --ring: 335 68% 62%;
+}
+
+/* ambre */
+:root[data-accent="ambre"] {
+  --primary: 34 80% 28%;
+  --primary-hover: 34 80% 22%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 36 78% 40%;
+  --interactive-hover: 34 80% 22%;
+  --interactive-soft: 40 70% 92%;
+  --accent: 40 70% 92%;
+  --accent-foreground: 34 80% 28%;
+  --ring: 36 78% 40%;
+}
+
+.dark[data-accent="ambre"] {
+  --primary: 40 72% 52%;
+  --primary-hover: 40 72% 58%;
+  --primary-foreground: 34 45% 8%;
+  --interactive: 40 72% 52%;
+  --interactive-hover: 40 72% 58%;
+  --interactive-soft: 34 30% 20%;
+  --accent: 34 30% 20%;
+  --accent-foreground: 34 55% 80%;
+  --ring: 40 72% 52%;
+}
+
+/* ardoise */
+:root[data-accent="ardoise"] {
+  --primary: 215 28% 25%;
+  --primary-hover: 215 28% 19%;
+  --primary-foreground: 0 0% 100%;
+  --interactive: 215 30% 38%;
+  --interactive-hover: 215 28% 19%;
+  --interactive-soft: 215 25% 93%;
+  --accent: 215 25% 93%;
+  --accent-foreground: 215 28% 25%;
+  --ring: 215 30% 38%;
+}
+
+.dark[data-accent="ardoise"] {
+  --primary: 213 22% 62%;
+  --primary-hover: 213 22% 69%;
+  --primary-foreground: 215 45% 8%;
+  --interactive: 213 22% 62%;
+  --interactive-hover: 213 22% 69%;
+  --interactive-soft: 215 30% 20%;
+  --accent: 215 30% 20%;
+  --accent-foreground: 215 55% 80%;
+  --ring: 213 22% 62%;
+}
+
+/* ==========================================================================
+   POLICES
+
+   `--font-sans` est la seule variable lue par Tailwind. Chaque famille est
+   chargée par `next/font` dans le layout racine, qui expose sa propre
+   variable ; on ne fait que rebrancher celle qui sert.
+
+   Le REÇU n'est pas concerné : il reste en chasse fixe, parce que c'est ce qui
+   aligne les montants et ce que l'œil reconnaît comme un ticket.
+   ========================================================================== */
+
+:root[data-font="outfit"] {
+  --font-sans: var(--font-outfit);
+}
+
+:root[data-font="serif"] {
+  --font-sans: var(--font-serif);
+}
+
+:root[data-font="lisible"] {
+  --font-sans: var(--font-lisible);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
