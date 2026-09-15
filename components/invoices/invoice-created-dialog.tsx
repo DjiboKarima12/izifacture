@@ -5,9 +5,40 @@ import Link from "next/link";
 import { CheckCircle2, Download, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import type { DocumentType } from "@/lib/domain/types";
 
 /**
- * Confirmation après création d'une facture.
+ * Ce que chaque type de document appelle le retour et l'invite à agir.
+ *
+ * Écrit en toutes lettres plutôt que dérivé du type : « Devis créé » et
+ * « Facture créée » ne s'accordent pas pareil, et une phrase construite par
+ * morceaux finit par produire du mauvais français.
+ */
+const MOTS = {
+  invoice: {
+    titre: "Facture créée",
+    phrase: (numero: string) =>
+      `La facture ${numero} est enregistrée et figée. Remettez son reçu au client.`,
+    retour: "Retour aux factures",
+    liste: "/invoices",
+  },
+  quote: {
+    titre: "Devis créé",
+    phrase: (numero: string) =>
+      `Le devis ${numero} est enregistré. Téléchargez-le ou imprimez-le pour l'envoyer au client.`,
+    retour: "Retour aux devis",
+    liste: "/quotes",
+  },
+  credit_note: {
+    titre: "Avoir créé",
+    phrase: (numero: string) => `L'avoir ${numero} est enregistré et figé.`,
+    retour: "Retour aux factures",
+    liste: "/invoices",
+  },
+} as const;
+
+/**
+ * Confirmation après création d'un document.
  *
  * Le document est enregistré avant que cette boîte n'apparaisse : elle ne
  * propose donc que la suite, jamais d'annuler. Fermer la boîte laisse
@@ -17,13 +48,18 @@ export function InvoiceCreatedDialog({
   invoiceId,
   number,
   isDraft,
+  documentType = "invoice",
   onOpenChange,
 }: {
   invoiceId: string | null;
   number: string | null;
   isDraft: boolean;
+  /** Décide des mots et de la liste vers laquelle on revient. */
+  documentType?: DocumentType;
   onOpenChange: (open: boolean) => void;
 }) {
+  const mots = MOTS[documentType];
+
   return (
     <Dialog.Root open={invoiceId !== null} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -37,14 +73,14 @@ export function InvoiceCreatedDialog({
           </span>
 
           <Dialog.Title className="mt-4 text-base font-semibold">
-            {isDraft ? "Brouillon enregistré" : "Facture créée"}
+            {isDraft ? "Brouillon enregistré" : mots.titre}
           </Dialog.Title>
           <Dialog.Description className="mt-1.5 text-sm text-muted-foreground">
             {isDraft
               ? "Le brouillon est enregistré. Il ne porte pas encore de numéro — celui-ci sera attribué à la création définitive."
               : number
-                ? `La facture ${number} est enregistrée et figée. Remettez son reçu au client.`
-                : "La facture est enregistrée."}
+                ? mots.phrase(number)
+                : "Le document est enregistré."}
           </Dialog.Description>
 
           {/*
@@ -101,10 +137,10 @@ export function InvoiceCreatedDialog({
             ) : null}
 
             <Link
-              href="/invoices"
+              href={mots.liste}
               className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
-              Retour aux factures
+              {mots.retour}
             </Link>
           </div>
         </Dialog.Content>

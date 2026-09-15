@@ -261,7 +261,9 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             avoir saisi un versement, et le reçu qu'on redonne au client en
             porte aussitôt le nouveau reste dû.
           */}
-          <ReceiptCard invoiceId={invoice.id}>{receipt}</ReceiptCard>
+          <ReceiptCard invoiceId={invoice.id} documentType={invoice.type}>
+            {receipt}
+          </ReceiptCard>
 
           {events.length > 0 ? (
             <Card>

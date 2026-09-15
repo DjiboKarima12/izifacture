@@ -848,6 +848,7 @@ export function InvoiceEditor({
           invoiceId={saved?.id ?? null}
           number={saved && !saved.draft ? saved.number : null}
           isDraft={saved?.draft ?? false}
+          documentType={documentType}
           onOpenChange={(open) => {
             if (open) return;
 
