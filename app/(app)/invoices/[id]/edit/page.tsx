@@ -20,8 +20,9 @@ export default async function EditInvoicePage({ params }: { params: { id: string
   // un formulaire dont l'enregistrement serait de toute façon refusé.
   if (!isEditable(invoice.status)) redirect(`/invoices/${invoice.id}`);
 
-  const [{ rows: clients }, { rows: invoices }] = await Promise.all([
+  const [{ rows: clients }, { rows: products }, { rows: invoices }] = await Promise.all([
     repositories.clients.list(session.orgId, { pageSize: 200 }),
+    repositories.products.list(session.orgId, { pageSize: 500 }),
     repositories.invoices.list(session.orgId, { type: "invoice", pageSize: 500 }),
   ]);
 
@@ -35,6 +36,7 @@ export default async function EditInvoicePage({ params }: { params: { id: string
     <InvoiceEditor
       organization={session.organization}
       clients={clients}
+      products={products}
       nextSequence={lastSequence + 1}
       invoice={invoice}
     />

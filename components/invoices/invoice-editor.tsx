@@ -24,6 +24,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { ClientCombobox } from "@/components/invoices/client-combobox";
 import { InvoicePreview, type PreviewLine } from "@/components/invoices/invoice-preview";
+import { ProductCombobox } from "@/components/invoices/product-combobox";
 import { ProductScanner } from "@/components/invoices/product-scanner";
 import { addScannedProduct, type ScannableLine } from "@/lib/catalogue";
 import { InvoiceCreatedDialog } from "@/components/invoices/invoice-created-dialog";
@@ -96,11 +97,20 @@ function linesFromInvoice(invoice: InvoiceWithItems): LineState[] {
 export function InvoiceEditor({
   organization,
   clients,
+  products,
   nextSequence,
   invoice,
 }: {
   organization: Organization;
   clients: Client[];
+  /**
+   * Catalogue, pour la suggestion à la frappe dans Désignation.
+   *
+   * Chargé en entier côté serveur plutôt que cherché à chaque touche : une
+   * boutique a des dizaines d'articles, pas des dizaines de milliers, et un
+   * aller-retour réseau par caractère rendrait la saisie poussive au comptoir.
+   */
+  products: Product[];
   nextSequence: number;
   /** Présent en modification : le formulaire est alors pré-rempli. */
   invoice?: InvoiceWithItems;
@@ -554,12 +564,31 @@ export function InvoiceEditor({
                     icon={Package}
                     required
                   >
-                    <input
+                    {/*
+                      Texte libre, avec le catalogue en suggestion. Choisir un
+                      article recopie son prix et son taux — exactement ce que
+                      fait la douchette, pour ceux qui n'en ont pas.
+                    */}
+                    <ProductCombobox
                       id={`${line.id}-description`}
+                      products={products}
+                      currency={organization.currency}
                       value={line.description}
-                      onChange={(event) => updateLine(line.id, { description: event.target.value })}
+                      disabled={issued}
                       placeholder="Prestation, produit…"
-                      className={bareInputClasses}
+                      onChange={(description) =>
+                        // La frappe libre détache la ligne du catalogue : ce
+                        // n'est plus l'article, c'est ce que l'utilisateur écrit.
+                        updateLine(line.id, { description, productId: undefined })
+                      }
+                      onPick={(product) =>
+                        updateLine(line.id, {
+                          description: product.name,
+                          unitPrice: String(product.unitPrice),
+                          taxRate: String(product.taxRate),
+                          productId: product.id,
+                        })
+                      }
                     />
                   </FloatingField>
 

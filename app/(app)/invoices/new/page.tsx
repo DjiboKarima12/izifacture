@@ -11,8 +11,9 @@ export const metadata: Metadata = { title: "Nouvelle facture" };
 export default async function NewInvoicePage() {
   const session = await getSession();
 
-  const [{ rows: clients }, { rows: invoices }] = await Promise.all([
+  const [{ rows: clients }, { rows: products }, { rows: invoices }] = await Promise.all([
     repositories.clients.list(session.orgId, { pageSize: 200 }),
+    repositories.products.list(session.orgId, { pageSize: 500 }),
     repositories.invoices.list(session.orgId, { type: "invoice", pageSize: 500 }),
   ]);
 
@@ -28,6 +29,7 @@ export default async function NewInvoicePage() {
     <InvoiceEditor
       organization={session.organization}
       clients={clients}
+      products={products}
       nextSequence={lastSequence + 1}
     />
   );
