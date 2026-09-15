@@ -4,6 +4,7 @@ import { Building2, FileText, Globe, Palette, Sparkles, UserRound, Users } from 
 
 import { PageShell } from "@/components/layout/page-shell";
 import { AppearancePanel } from "@/components/settings/appearance-panel";
+import { CreateMemberForm } from "@/components/settings/create-member-form";
 import { InvitePanel } from "@/components/settings/invite-panel";
 import { listInvitations } from "@/lib/actions/invitations";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -165,6 +166,11 @@ export default async function SettingsPage({
               ))}
             </CardContent>
           </Card>
+
+          {/* La création directe d'abord : c'est le geste attendu dans une
+              boutique. Le code d'invitation reste en dessous, pour quelqu'un qui
+              a déjà un compte ou qui s'inscrira depuis son propre appareil. */}
+          <CreateMemberForm />
 
           <InvitePanel invitations={invitations} />
         </div>
