@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import {
   PAYMENT_METHODS,
   type Client,
+  type DocumentType,
   type InvoiceWithItems,
   type Organization,
   type PaymentMethod,
@@ -100,6 +101,7 @@ export function InvoiceEditor({
   products,
   nextSequence,
   invoice,
+  documentType: requestedType = "invoice",
 }: {
   organization: Organization;
   clients: Client[];
@@ -112,6 +114,12 @@ export function InvoiceEditor({
    */
   products: Product[];
   nextSequence: number;
+  /**
+   * Type du document à CRÉER. Ignoré en modification : on ne transforme pas un
+   * devis en facture en rouvrant son brouillon — c'est le rôle d'« Accepter et
+   * facturer », qui crée un second document et conserve les deux.
+   */
+  documentType?: DocumentType;
   /** Présent en modification : le formulaire est alors pré-rempli. */
   invoice?: InvoiceWithItems;
 }) {
@@ -149,7 +157,8 @@ export function InvoiceEditor({
     invoice ? linesFromInvoice(invoice) : [newLine(organization.defaultTaxRate)],
   );
 
-  const documentType = invoice?.type ?? "invoice";
+  // En modification, le type du document existant l'emporte toujours.
+  const documentType = invoice?.type ?? requestedType;
   const client = clients.find((row) => row.id === clientId) ?? null;
   // Un brouillon n'a pas encore de numéro : on montre celui qu'il recevra, avec
   // le préfixe de SON type — un avoir ne prend pas un numéro de facture.
@@ -232,7 +241,7 @@ export function InvoiceEditor({
       clientId: clientId || null,
       // On conserve le type du document existant : modifier un brouillon d'avoir
       // ne doit pas le transformer en facture.
-      type: invoice?.type ?? ("invoice" as const),
+      type: documentType,
       issueDate,
       dueDate,
       currency: organization.currency,

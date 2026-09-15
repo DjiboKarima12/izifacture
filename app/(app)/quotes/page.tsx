@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Receipt } from "lucide-react";
+import { Plus, Receipt } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -35,6 +36,14 @@ export default async function QuotesPage({
       <PageHeader
         title="Devis"
         description={search ? `${total} résultat${total > 1 ? "s" : ""} pour « ${search} »` : `${total} devis`}
+        actions={
+          <Button asChild>
+            <Link href="/quotes/new">
+              <Plus aria-hidden />
+              Nouveau devis
+            </Link>
+          </Button>
+        }
       />
 
       <Card className="mt-6">
@@ -44,6 +53,13 @@ export default async function QuotesPage({
               icon={Receipt}
               title={search ? "Aucun devis ne correspond" : "Aucun devis"}
               description="Un devis propose un montant sans rien facturer. Une fois accepté, il se convertit en facture."
+              action={
+                search ? undefined : (
+                  <Button asChild>
+                    <Link href="/quotes/new">Créer un devis</Link>
+                  </Button>
+                )
+              }
             />
           ) : (
             <Table>
