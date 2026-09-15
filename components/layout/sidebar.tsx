@@ -36,14 +36,24 @@ export function Sidebar({
 
   return (
     <div className="flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
-      <div className="flex items-center gap-2 px-2">
+      {/* `shrink-0` : la marque garde sa hauteur quand la place manque. */}
+      <div className="flex shrink-0 items-center gap-2 px-2">
         <Link href="/dashboard" onClick={onNavigate}>
           <Logo onSidebar />
         </Link>
         <PlanBadge plan={plan} onSidebar />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-6">
+      {/*
+        `overflow-y-auto` — sans lui, la navigation ne peut pas défiler : sur une
+        fenêtre courte elle déborde et vient chevaucher le pied de page, avatar
+        par-dessus le trait de séparation. `min-h-0` seul autorise la
+        compression, il ne dit pas où va le trop-plein.
+
+        `overscroll-contain` empêche la page de défiler derrière une fois la
+        navigation arrivée en bout de course.
+      */}
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             <p className="px-3 pb-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-sidebar-muted">
@@ -84,7 +94,8 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 border-t border-sidebar-border px-2 pt-4">
+      {/* `shrink-0` : le pied ne se comprime pas, c'est la navigation qui défile. */}
+      <div className="flex shrink-0 items-center gap-2.5 border-t border-sidebar-border px-2 pt-4">
         <span
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sidebar-active text-xs font-semibold text-sidebar-foreground"
           aria-hidden
