@@ -205,10 +205,9 @@ export default function HomePage() {
                 <ul className="mt-7 space-y-3 text-sm">
                   {[
                     `${FREE_MONTHLY_QUOTA} factures par mois`,
-                    "Devis et avoirs sans limite",
-                    "Catalogue produits et douchette",
                     "Reçus imprimés et PDF",
-                    "Clients, encaissements, tableau de bord",
+                    "Clients et encaissements",
+                    "Tableau de bord",
                   ].map((ligne) => (
                     <li key={ligne} className="flex items-start gap-2.5">
                       {/*
@@ -247,9 +246,11 @@ export default function HomePage() {
                 <ul className="mt-7 space-y-3 text-sm">
                   {[
                     "Factures sans limite",
-                    "Tout ce que contient le plan gratuit",
+                    "Devis et avoirs",
+                    "Catalogue produits et douchette",
                     "Plusieurs utilisateurs sur la même boutique",
                     "Support par WhatsApp",
+                    "Tout ce que contient le plan gratuit",
                   ].map((ligne) => (
                     <li key={ligne} className="flex items-start gap-2.5">
                       <Check className="mt-0.5 size-4 shrink-0 text-status-paid" aria-hidden />

@@ -2,11 +2,26 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * `text-card-foreground` EST OBLIGATOIRE, même s'il paraît redondant.
+ *
+ * Une carte qui pose son fond sans poser sa couleur de texte hérite de celle du
+ * parent. Tant qu'elle vit sur une surface claire, la couleur héritée vaut la
+ * sienne et l'omission ne se voit pas. Posée sur la bande sombre de la vitrine,
+ * elle héritait de `sidebar-foreground` : du crème sur du crème, une carte
+ * presque vide à l'écran alors que le balisage était juste.
+ *
+ * Le jeton ferme la carte sur elle-même : elle s'affiche pareil quel que soit
+ * le fond qui la porte.
+ */
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("rounded-xl border border-border bg-card shadow-card", className)}
+      className={cn(
+        "rounded-xl border border-border bg-card text-card-foreground shadow-card",
+        className,
+      )}
       {...props}
     />
   ),
