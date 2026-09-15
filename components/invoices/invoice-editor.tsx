@@ -24,6 +24,8 @@ import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { ClientCombobox } from "@/components/invoices/client-combobox";
 import { InvoicePreview, type PreviewLine } from "@/components/invoices/invoice-preview";
+import { ProductScanner } from "@/components/invoices/product-scanner";
+import { addScannedProduct, type ScannableLine } from "@/lib/catalogue";
 import { InvoiceCreatedDialog } from "@/components/invoices/invoice-created-dialog";
 import { PrintPageSize } from "@/components/invoices/print-page-size";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -39,6 +41,7 @@ import {
   type InvoiceWithItems,
   type Organization,
   type PaymentMethod,
+  type Product,
 } from "@/lib/domain/types";
 
 /**
@@ -54,13 +57,7 @@ import {
  * l'étape où les Server Actions seront branchées.
  */
 
-type LineState = {
-  id: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-  taxRate: string;
-};
+type LineState = ScannableLine;
 
 type Mode = "standard" | "recurring";
 
@@ -306,6 +303,23 @@ export function InvoiceEditor({
     setError(null);
   };
 
+  /**
+   * Ajoute l'article scanné, ou augmente sa quantité s'il est déjà sur la vente.
+   *
+   * Scanner trois fois la même boîte doit donner « 3 × boîte », pas trois lignes
+   * identiques : c'est ce que fait une caisse, et c'est ce qui se lit sur le
+   * ticket. Les articles DIFFÉRENTS ajoutent bien une ligne chacun.
+   *
+   * Cas particulier de la première ligne : le formulaire s'ouvre avec une ligne
+   * vide. La remplir plutôt que d'en ajouter une évite de laisser une ligne
+   * fantôme en tête de facture, qui bloquerait l'émission faute de désignation.
+   */
+  const addFromProduct = (product: Product) => {
+    setLines((current) =>
+      addScannedProduct(current, product, () => `line-${(lineCounter += 1)}`),
+    );
+  };
+
   const updateLine = (id: string, patch: Partial<LineState>) =>
     setLines((current) => current.map((line) => (line.id === id ? { ...line, ...patch } : line)));
 
@@ -492,6 +506,19 @@ export function InvoiceEditor({
 
           <section className="mt-8">
             <h2 className="text-sm font-semibold">Lignes de facturation</h2>
+
+            {/*
+              Le scan vient AVANT les lignes : c'est le geste le plus fréquent,
+              et il doit être le premier sous la main. La saisie manuelle reste
+              juste en dessous, pour ce qui n'est pas au catalogue.
+            */}
+            <div className="mt-4">
+              <ProductScanner
+                currency={organization.currency}
+                onScanned={addFromProduct}
+                disabled={pending || issued}
+              />
+            </div>
 
             <div className="mt-4 space-y-3">
               {lines.map((line, index) => (

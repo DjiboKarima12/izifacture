@@ -2,9 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { z } from "zod";
+
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
 import { productInputSchema } from "@/lib/domain/schemas";
+import type { Product } from "@/lib/domain/types";
 import type { ActionResult } from "@/lib/actions/invoices";
 
 /**
@@ -111,6 +114,32 @@ export async function restoreProduct(productId: string): Promise<ActionResult> {
     await repositories.products.restore(session.orgId, productId);
     revalidateProducts();
     return { ok: true, data: undefined };
+  } catch (caught) {
+    return failure(caught);
+  }
+}
+
+/**
+ * Recherche un article par son code-barres, pour le scan en caisse.
+ *
+ * Renvoie `ok: true` avec `product: null` quand le code est inconnu : ce n'est
+ * pas une erreur, c'est une réponse. Un article non catalogué se saisit à la
+ * main, la vente ne doit pas s'arrêter là.
+ *
+ * Le dépôt borne la recherche à l'organisation de la session et exclut les
+ * articles archivés — le code-barres venant du lecteur n'est jamais une
+ * autorisation d'accès.
+ */
+export async function findProductByBarcode(
+  barcode: unknown,
+): Promise<ActionResult<{ product: Product | null }>> {
+  const parsed = z.string().trim().min(1).max(64).safeParse(barcode);
+  if (!parsed.success) return { ok: false, error: "Code-barres illisible." };
+
+  try {
+    const session = await getSession();
+    const product = await repositories.products.findByBarcode(session.orgId, parsed.data);
+    return { ok: true, data: { product } };
   } catch (caught) {
     return failure(caught);
   }
