@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { emailSchema } from "@/lib/domain/schemas";
+import { completerIdentifiant } from "@/lib/members";
 import type { ActionResult } from "@/lib/actions/invoices";
 
 const credentialsSchema = z.object({

@@ -74,7 +74,7 @@ export async function createMemberAccount(
     return { ok: false, error: "Seuls le propriétaire et les administrateurs peuvent créer un compte." };
   }
 
-  const login = adresseDeConnexion(parsed.data.identifiant, session.orgId);
+  const login = adresseDeConnexion(parsed.data.identifiant);
   const admin = createSupabaseAdminClient();
 
   const { data: cree, error: erreurCompte } = await admin.auth.admin.createUser({
@@ -89,7 +89,7 @@ export async function createMemberAccount(
   if (erreurCompte || !cree?.user) {
     const message = erreurCompte?.message ?? "";
     if (/already|registered|exists/i.test(message)) {
-      return { ok: false, error: "Cet identifiant est déjà pris dans votre boutique." };
+      return { ok: false, error: "Cet identifiant est déjà utilisé. Essayez-en un autre." };
     }
     console.error("[compte caissier · création]", erreurCompte);
     return { ok: false, error: "Impossible de créer le compte. Réessayez." };

@@ -102,13 +102,30 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                 </>
               ) : null}
 
-              <Field label="Email" htmlFor="email" required>
+              {/*
+                `type="text"` et non `type="email"` à la connexion : un caissier
+                se connecte avec « majida », et le navigateur refusait la saisie
+                avant même qu'elle atteigne le serveur. L'inscription garde le
+                contrôle du navigateur — un compte qu'on crée soi-même doit
+                pouvoir recevoir un lien de réinitialisation.
+              */}
+              <Field
+                label={isSignUp ? "Email" : "Email ou identifiant"}
+                htmlFor="email"
+                hint={
+                  isSignUp ? undefined : "Votre email, ou l'identifiant reçu de votre responsable."
+                }
+                required
+              >
                 <Input
                   id="email"
-                  type="email"
+                  type={isSignUp ? "email" : "text"}
+                  inputMode="email"
                   value={form.email}
                   onChange={set("email")}
-                  autoComplete="email"
+                  autoComplete={isSignUp ? "email" : "username"}
+                  autoCapitalize="none"
+                  spellCheck={false}
                   required
                 />
               </Field>

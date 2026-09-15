@@ -2,13 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   adresseDeConnexion,
+  completerIdentifiant,
   identifiantDepuisAdresse,
   identifiantValide,
   LONGUEUR_MIN_MOT_DE_PASSE,
 } from "@/lib/members";
-
-const ORG = "99df371f-1921-467d-ba8b-6471e7bd28d1";
-const AUTRE_ORG = "d5d94848-9773-4b14-87a5-d2de9e554e81";
 
 describe("identifiantValide", () => {
   it("accepte ce qu'un responsable tapera vraiment", () => {
@@ -29,16 +27,30 @@ describe("identifiantValide", () => {
 });
 
 describe("adresseDeConnexion", () => {
-  it("compose une adresse propre à la boutique", () => {
-    expect(adresseDeConnexion("awa", ORG)).toBe("awa@99df371f.mamafacture.app");
-  });
-
-  it("DEUX BOUTIQUES peuvent chacune avoir leur Awa", () => {
-    expect(adresseDeConnexion("awa", ORG)).not.toBe(adresseDeConnexion("awa", AUTRE_ORG));
+  it("compose une adresse courte, dictable au téléphone", () => {
+    expect(adresseDeConnexion("awa")).toBe("awa@caisse.mamafacture.app");
   });
 
   it("normalise la casse : « Awa » et « awa » sont le même compte", () => {
-    expect(adresseDeConnexion("Awa", ORG)).toBe(adresseDeConnexion("awa", ORG));
+    expect(adresseDeConnexion("Awa")).toBe(adresseDeConnexion("awa"));
+  });
+});
+
+describe("completerIdentifiant", () => {
+  it("complète ce que le caissier tape vraiment : son seul identifiant", () => {
+    expect(completerIdentifiant("majida")).toBe("majida@caisse.mamafacture.app");
+    expect(completerIdentifiant("  MAJIDA  ")).toBe("majida@caisse.mamafacture.app");
+  });
+
+  it("laisse intacte une vraie adresse : le responsable garde la sienne", () => {
+    expect(completerIdentifiant("karimadjibo65@gmail.com")).toBe("karimadjibo65@gmail.com");
+    expect(completerIdentifiant("Karima@Gmail.com")).toBe("karima@gmail.com");
+  });
+
+  it("ne fabrique rien à partir d'une saisie qui n'est pas un identifiant valable", () => {
+    // Sans ça, « aw » deviendrait « aw@caisse… » et l'erreur parlerait d'un
+    // compte inexistant plutôt que d'une saisie trop courte.
+    expect(completerIdentifiant("aw")).toBe("aw");
   });
 });
 
