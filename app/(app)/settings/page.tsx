@@ -4,6 +4,8 @@ import { Building2, FileText, Globe, Palette, Sparkles, UserRound, Users } from 
 
 import { PageShell } from "@/components/layout/page-shell";
 import { AppearancePanel } from "@/components/settings/appearance-panel";
+import { InvitePanel } from "@/components/settings/invite-panel";
+import { listInvitations } from "@/lib/actions/invitations";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { OrganizationForm, type SettingsTab } from "@/components/settings/organization-form";
@@ -115,7 +117,10 @@ export default async function SettingsPage({
     );
   }
 
-  const members = await repositories.organizations.listMembers(session.orgId);
+  const [members, invitations] = await Promise.all([
+    repositories.organizations.listMembers(session.orgId),
+    listInvitations(),
+  ]);
 
   return (
     <PageShell className="max-w-[1040px] pt-0">
@@ -161,29 +166,7 @@ export default async function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* Les membres existants s'affichent ; ce sont les INVITATIONS qui ne
-              sont pas encore construites — elles dépendent de l'authentification. */}
-          <Card>
-            <CardContent className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-              <span
-                className="flex size-12 items-center justify-center rounded-lg bg-accent text-accent-foreground"
-                aria-hidden
-              >
-                <UserRound className="size-5" />
-              </span>
-              <div className="space-y-1">
-                <p className="font-semibold">Gestion des accès</p>
-                <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                  Inviter un collaborateur et régler ses droits n&apos;est pas encore disponible.
-                  Cette fonction arrive avec l&apos;authentification.
-                </p>
-              </div>
-              <Button variant="outline" size="sm" className="mt-1" disabled>
-                <Sparkles aria-hidden />
-                Mettre à niveau (Pro)
-              </Button>
-            </CardContent>
-          </Card>
+          <InvitePanel invitations={invitations} />
         </div>
       </div>
     </PageShell>
