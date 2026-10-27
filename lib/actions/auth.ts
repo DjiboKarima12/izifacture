@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { isAuthRetryableFetchError, type AuthError } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -42,6 +43,18 @@ function invalid(error: z.ZodError): ActionResult<never> {
   return { ok: false, error: first ?? "Formulaire invalide." };
 }
 
+/**
+ * Supabase injoignable (réseau coupé, service en panne) : ce n'est pas une
+ * réponse sur le compte, donc la dire ne révèle rien. La taire ferait passer une
+ * coupure pour un mauvais mot de passe, ou pour un email parti qui ne l'est pas.
+ */
+function serviceInjoignable(error: AuthError): boolean {
+  return isAuthRetryableFetchError(error) || (error.status ?? 0) >= 500;
+}
+
+const MESSAGE_INJOIGNABLE =
+  "Service injoignable. Vérifiez votre connexion internet et réessayez.";
+
 export async function signIn(input: unknown): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -50,6 +63,7 @@ export async function signIn(input: unknown): Promise<ActionResult> {
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
+    if (serviceInjoignable(error)) return { ok: false, error: MESSAGE_INJOIGNABLE };
     // Message volontairement identique pour un email inconnu et un mot de passe
     // faux : distinguer les deux permettrait d'énumérer les comptes existants.
     return { ok: false, error: "Email ou mot de passe incorrect." };
@@ -127,9 +141,17 @@ export async function resetPassword(input: unknown): Promise<ActionResult> {
 
   if (error) {
     console.error("Erreur lors de l'envoi de l'email de réinitialisation :", error);
+    if (serviceInjoignable(error)) return { ok: false, error: MESSAGE_INJOIGNABLE };
+    // Plafond d'envoi de tout le projet, pas d'un compte : le dire ne révèle rien.
+    if (error.code === "over_email_send_rate_limit") {
+      return {
+        ok: false,
+        error: "Trop d'emails envoyés pour le moment. Réessayez dans une heure.",
+      };
+    }
   }
 
-  // Toujours un succès — ne pas révéler si le compte existe.
+  // Hors panne, toujours un succès — ne pas révéler si le compte existe.
   return { ok: true, data: undefined };
 }
 
