@@ -132,11 +132,16 @@ export async function resetPassword(input: unknown): Promise<ActionResult> {
   const parsed = z.object({ email: emailSchema }).safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
 
-  const origin = headers().get("origin") ?? "";
+  const headerList = await headers();
+  const origin = headerList.get("origin") ?? "";
   const supabase = createSupabaseServerClient();
 
+  const redirectToUrl = process.env.NEXT_PUBLIC_SITE_URL 
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`
+    : `${origin || "https://facture.barketechnologie.com"}/auth/callback?next=/reset-password`;
+
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+    redirectTo: redirectToUrl,
   });
 
   if (error) {
