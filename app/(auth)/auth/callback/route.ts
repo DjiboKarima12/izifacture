@@ -6,13 +6,13 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
-  const type = searchParams.get("type") as EmailOtpType | null;
+  // Si le type n'est pas dans l'URL mais qu'on a un token_hash, on force "recovery" par défaut
+  const type = (searchParams.get("type") as EmailOtpType) || "recovery";
   const next = searchParams.get("next") ?? "/reset-password";
 
   const supabase = createSupabaseServerClient();
 
-  // Cas 1 : Récupération par token_hash (utilisé pour la réinitialisation de mot de passe)
-  if (token_hash && type) {
+  if (token_hash) {
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    console.error("Erreur verifyOtp:", error.message);
   }
 
-  // Cas 2 : Échange de code classique (flux OAuth ou liens magiques)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
@@ -30,6 +30,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Si aucun des deux ne fonctionne, redirection vers le login avec l'erreur
   return NextResponse.redirect(`${origin}/login?error=lien_invalide`);
 }
