@@ -11,6 +11,10 @@
  * artistique se fait dans ce seul fichier.
  */
 @layer base {
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
   :root {
     /**
      * SABLE — la base n'est plus blanche mais crème, et le gris n'est plus froid.
