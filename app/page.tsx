@@ -45,21 +45,21 @@ export default function HomePage() {
     <div className="min-h-screen bg-surface">
       {/* ==================================================== Bande sombre */}
       <div className="bg-sidebar text-sidebar-foreground">
-        <header className="mx-auto flex h-16 max-w-[1120px] items-center gap-4 px-4 sm:px-6">
-          <Logo onSidebar />
+       <header className="mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-2 px-3 sm:px-6">
+  <Logo onSidebar />
 
-          <nav className="ml-auto flex items-center gap-2" aria-label="Accès au compte">
-            <Link
-              href="/login"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Se connecter
-            </Link>
-            <Button asChild size="sm">
-              <Link href="/signup">Créer un compte</Link>
-            </Button>
-          </nav>
-        </header>
+  <nav className="flex items-center gap-1.5 sm:gap-2" aria-label="Accès au compte">
+    <Link
+      href="/login"
+      className="rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      Se connecter
+    </Link>
+    <Button asChild size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">
+      <Link href="/signup">Créer un compte</Link>
+    </Button>
+  </nav>
+</header>
 
         <section className="mx-auto max-w-[1120px] px-4 pb-20 pt-10 sm:px-6 sm:pb-28 sm:pt-16">
           <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_300px]">
