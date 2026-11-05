@@ -292,19 +292,45 @@ export default function HomePage() {
             </p>
 
             <dl className="mt-9 grid gap-6 sm:grid-cols-3">
-              {[
-                { terme: "WhatsApp", valeur: "+227 89 35 35 00" },
-                { terme: "Email", valeur: "barketechnologie@gmail.com" },
-                { terme: "Adresse", valeur: "Niamey, Niger" },
-              ].map((contact) => (
-                <div key={contact.terme}>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {contact.terme}
-                  </dt>
-                  <dd className="mt-1.5 break-words font-medium">{contact.valeur}</dd>
-                </div>
-              ))}
-            </dl>
+  <div>
+    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      WhatsApp
+    </dt>
+    <dd className="mt-1.5 break-words font-medium">
+      <a 
+        href="https://wa.me/22789353500" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="hover:underline text-foreground transition-colors"
+      >
+        +227 89 35 35 00
+      </a>
+    </dd>
+  </div>
+
+  <div>
+    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      Email
+    </dt>
+    <dd className="mt-1.5 break-words font-medium">
+      <a 
+        href="mailto:barketechnologie@gmail.com"
+        className="hover:underline text-foreground transition-colors"
+      >
+        barketechnologie@gmail.com
+      </a>
+    </dd>
+  </div>
+
+  <div>
+    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      Adresse
+    </dt>
+    <dd className="mt-1.5 break-words font-medium">
+      Niamey, Niger
+    </dd>
+  </div>
+</dl>
           </div>
         </Reveal>
       </section>
