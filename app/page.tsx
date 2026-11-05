@@ -45,18 +45,18 @@ export default function HomePage() {
     <div className="min-h-screen bg-surface">
       {/* ==================================================== Bande sombre */}
       <div className="bg-sidebar text-sidebar-foreground">
-       <header className="mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-2 px-3 sm:px-6">
+       <header className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 sm:px-6">
   <Logo onSidebar />
 
-  <nav className="flex items-center gap-1.5 sm:gap-2" aria-label="Accès au compte">
+  <nav className="flex items-center gap-1 sm:gap-2" aria-label="Accès au compte">
     <Link
       href="/login"
-      className="rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="rounded-lg px-2 py-1.5 text-xs font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground"
     >
-      Se connecter
+      Connexion
     </Link>
-    <Button asChild size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">
-      <Link href="/signup">Créer un compte</Link>
+    <Button asChild size="sm" className="text-xs px-2.5 h-8">
+      <Link href="/signup">S&apos;inscrire</Link>
     </Button>
   </nav>
 </header>
