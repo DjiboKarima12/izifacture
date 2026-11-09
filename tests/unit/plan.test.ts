@@ -6,6 +6,7 @@ import {
   monthBounds,
   monthKey,
   monthlyQuota,
+  planOf,
   quotaState,
   resolvePlan,
 } from "@/lib/plan";
@@ -35,6 +36,31 @@ describe("resolvePlan", () => {
     expect(resolvePlan("premium", "canceled")).toBe("free");
     expect(resolvePlan("premium", null)).toBe("free");
     expect(resolvePlan("premium", "active")).toBe("premium");
+  });
+
+  /**
+   * Un mois payé et activé à la main doit s'arrêter seul : personne ne
+   * repassera le statut à la main le jour de l'échéance.
+   */
+  it("retombe sur le plan gratuit à l'échéance de la période payée", () => {
+    const now = new Date("2026-11-09T12:00:00Z");
+    expect(resolvePlan("premium", "active", "2026-12-09T12:00:00Z", now)).toBe("premium");
+    expect(resolvePlan("premium", "active", "2026-11-09T12:00:00Z", now)).toBe("free");
+    expect(resolvePlan("premium", "active", "2026-10-09T12:00:00Z", now)).toBe("free");
+    expect(resolvePlan("premium", "active", "pas une date", now)).toBe("free");
+    expect(resolvePlan("premium", "active", null, now)).toBe("premium");
+  });
+});
+
+describe("planOf", () => {
+  it("lit l'abonnement complet", () => {
+    const now = new Date("2026-11-09T12:00:00Z");
+    expect(
+      planOf({ plan: "premium", status: "active", currentPeriodEnd: "2026-11-10T00:00:00Z" }, now),
+    ).toBe("premium");
+    expect(
+      planOf({ plan: "premium", status: "active", currentPeriodEnd: "2026-11-01T00:00:00Z" }, now),
+    ).toBe("free");
   });
 });
 

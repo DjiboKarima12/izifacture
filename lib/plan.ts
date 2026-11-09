@@ -40,13 +40,32 @@ export function isPlan(value: unknown): value is Plan {
  * Le sens du défaut compte : une valeur inconnue en base, un abonnement expiré
  * ou en impayé donne le plan gratuit. L'inverse ouvrirait l'application à qui
  * saurait écrire n'importe quoi dans la colonne.
+ *
+ * Une période payée et ÉCHUE retombe aussi sur `free`, sans attendre qu'un
+ * webhook ou une main repasse le statut : l'activation manuelle d'un mois payé
+ * par Mobile Money s'arrête d'elle-même. Sans date de fin, rien n'expire.
  */
 export function resolvePlan(
   plan: string | null | undefined,
   status: string | null | undefined = "active",
+  currentPeriodEnd: string | null = null,
+  now: Date = new Date(),
 ): Plan {
   if (status !== "active") return "free";
+  if (currentPeriodEnd !== null && !(Date.parse(currentPeriodEnd) > now.getTime())) return "free";
   return isPlan(plan) ? plan : "free";
+}
+
+/** L'abonnement tel que la couche données le renvoie. */
+export type SubscriptionInfo = {
+  plan: string;
+  status: string;
+  /** Fin de la période payée (ISO), `null` = sans échéance. */
+  currentPeriodEnd: string | null;
+};
+
+export function planOf(subscription: SubscriptionInfo, now: Date = new Date()): Plan {
+  return resolvePlan(subscription.plan, subscription.status, subscription.currentPeriodEnd, now);
 }
 
 export function isPremium(plan: Plan): boolean {

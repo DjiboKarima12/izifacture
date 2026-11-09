@@ -258,7 +258,8 @@ Ils répondent à deux situations réelles et coexistent volontairement.
 | # | Exigence | État |
 |---|---|---|
 | EF-11.1 | Plan **gratuit** : 5 factures émises par mois calendaire | ✅ |
-| EF-11.2 | Plan **premium** : 2 000 FCFA par mois, sans limite | ⚠️ le plan existe en base ; **aucun paiement n'est encaissable** (§11.2) |
+| EF-11.2 | Plan **premium** : 2 000 FCFA par mois ou 20 000 FCFA par an, sans limite | ⚠️ page `/abonnement` faite : la demande part sur WhatsApp et l'activation est **manuelle** (`docs/abonnement-manuel.md`) ; aucun prestataire Mobile Money branché (§11.2) |
+| EF-11.9 | Une période payée **échue** retombe sur gratuit d'elle-même, d'après `current_period_end` | ✅ |
 | EF-11.3 | Le quota compte les **factures émises** : un brouillon, un devis ou un avoir ne consomment rien. Un devis ne prouve aucune vente ; bloquer la correction d'une erreur derrière un paiement serait indéfendable | ✅ |
 | EF-11.4 | Le mois se lit sur l'horodatage serveur d'émission, jamais sur la date saisie — celle-ci se choisit et pourrait être antidatée | ✅ |
 | EF-11.5 | La barrière vit dans la **Server Action**, pas dans le composant : un bouton masqué reste appelable, un paywall qui ne tient qu'à l'écran n'est pas un paywall | ✅ |

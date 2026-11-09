@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TopSearch } from "@/components/layout/top-search";
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
-import { resolvePlan } from "@/lib/plan";
+import { planOf } from "@/lib/plan";
 import { supabaseDataEnabled } from "@/lib/supabase/env";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
    * suite, sans reconnexion — c'est la même règle que la barrière du quota.
    */
   const subscription = await repositories.organizations.getSubscription(session.orgId);
-  const plan = resolvePlan(subscription.plan, subscription.status);
+  const plan = planOf(subscription);
   const canSignOut = supabaseDataEnabled();
 
   return (

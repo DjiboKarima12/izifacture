@@ -222,7 +222,7 @@ const organizations: OrganizationRepo = {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase
       .from("subscriptions")
-      .select("plan, status")
+      .select("plan, status, current_period_end")
       .eq("org_id", orgId)
       .maybeSingle();
 
@@ -231,8 +231,11 @@ const organizations: OrganizationRepo = {
     // Ligne absente = plan gratuit. La table est en lecture seule pour
     // l'application (cf. RLS) : seul le service role y écrit, donc un
     // utilisateur ne peut pas s'attribuer un plan payant.
-    const row = (data ?? null) as { plan: string; status: string } | null;
-    return row ?? { plan: "free", status: "active" };
+    const row = (data ?? null) as
+      | { plan: string; status: string; current_period_end: string | null }
+      | null;
+    if (!row) return { plan: "free", status: "active", currentPeriodEnd: null };
+    return { plan: row.plan, status: row.status, currentPeriodEnd: row.current_period_end };
   },
 };
 

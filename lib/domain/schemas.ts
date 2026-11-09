@@ -20,6 +20,13 @@ import {
   RECURRENCE_FREQUENCIES,
 } from "@/lib/domain/types";
 
+import {
+  MOBILE_MONEY_COUNTRY_CODES,
+  mobileMoneyCountry,
+  normalizePhoneDigits,
+} from "@/lib/billing";
+import { BILLING_PERIODS } from "@/lib/pricing";
+
 /* ------------------------------------------------------------ Primitives */
 
 export const uuidSchema = z.string().uuid("Identifiant invalide");
@@ -301,3 +308,30 @@ export const recurringScheduleInputSchema = z
   });
 
 export type RecurringScheduleInput = z.infer<typeof recurringScheduleInputSchema>;
+
+/* ------------------------------------------------------------- Abonnement */
+
+/**
+ * Demande de passage au premium. Le numéro est vérifié contre la longueur
+ * nationale du pays choisi : un chiffre oublié enverrait la demande de
+ * paiement à quelqu'un d'autre.
+ */
+export const subscriptionRequestSchema = z
+  .object({
+    period: z.enum(BILLING_PERIODS),
+    country: z.enum(MOBILE_MONEY_COUNTRY_CODES, { message: "Pays non pris en charge" }),
+    phone: z.string().trim().min(1, "Saisissez votre numéro Mobile Money"),
+  })
+  .superRefine((request, ctx) => {
+    const country = mobileMoneyCountry(request.country);
+    if (!country) return;
+    if (normalizePhoneDigits(request.phone).length !== country.digits) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Le numéro doit compter ${country.digits} chiffres, sans l'indicatif +${country.dialCode}`,
+        path: ["phone"],
+      });
+    }
+  });
+
+export type SubscriptionRequestInput = z.infer<typeof subscriptionRequestSchema>;

@@ -39,6 +39,7 @@ import type {
   ProductInput,
   RecurringScheduleInput,
 } from "@/lib/domain/schemas";
+import type { SubscriptionInfo } from "@/lib/plan";
 
 export type Paginated<T> = {
   rows: T[];
@@ -111,11 +112,11 @@ export interface OrganizationRepo {
   /**
    * Abonnement de l'organisation, tel qu'il est stocké.
    *
-   * Renvoie les valeurs brutes : c'est `resolvePlan()` qui décide ce qu'elles
+   * Renvoie les valeurs brutes : c'est `planOf()` qui décide ce qu'elles
    * valent, et lui seul. Une organisation sans ligne d'abonnement est traitée
    * comme gratuite plutôt que comme une erreur.
    */
-  getSubscription(orgId: UUID): Promise<{ plan: string; status: string }>;
+  getSubscription(orgId: UUID): Promise<SubscriptionInfo>;
 }
 
 export interface ClientRepo {

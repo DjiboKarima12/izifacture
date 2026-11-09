@@ -17,6 +17,7 @@
 import { computeTotals } from "@/lib/tax";
 import { addDays, addMonths, todayIso } from "@/lib/dates";
 import { formatDocumentNumber } from "@/lib/numbering";
+import type { SubscriptionInfo } from "@/lib/plan";
 import type {
   Client,
   Product,
@@ -46,7 +47,7 @@ export type MockDb = {
   /** clé `orgId:type:année` → dernière séquence attribuée */
   counters: Map<string, number>;
   /** clé `orgId` → abonnement. Absent = plan gratuit. */
-  subscriptions: Map<string, { plan: string; status: string }>;
+  subscriptions: Map<string, SubscriptionInfo>;
 };
 
 const SEED = 20260812;
@@ -488,7 +489,7 @@ function buildDataset(): MockDb {
     counters,
     // L'organisation de démonstration démarre au plan gratuit : c'est le
     // parcours qu'on veut pouvoir essayer, quota et blocage compris.
-    subscriptions: new Map([[organization.id, { plan: "free", status: "active" }]]),
+    subscriptions: new Map([[organization.id, { plan: "free", status: "active", currentPeriodEnd: null }]]),
   };
 }
 

@@ -1,5 +1,6 @@
 import {
   CircleHelp,
+  CreditCard,
   FileText,
   LayoutDashboard,
   Package,
@@ -42,6 +43,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Utilitaires",
     items: [
       { href: "/settings", label: "Paramètres", icon: Settings },
+      { href: "/abonnement", label: "Abonnement", icon: CreditCard },
       { href: "/support", label: "Aide et Support", icon: CircleHelp },
     ],
   },

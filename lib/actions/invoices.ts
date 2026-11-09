@@ -11,7 +11,7 @@ import {
   paymentInputSchema,
 } from "@/lib/domain/schemas";
 import { settleAtCounter } from "@/lib/payments";
-import { monthBounds, quotaMessage, quotaState, resolvePlan } from "@/lib/plan";
+import { monthBounds, planOf, quotaMessage, quotaState } from "@/lib/plan";
 import { amountDue } from "@/lib/tax";
 import { todayIso } from "@/lib/dates";
 import type { DocumentType, IsoDate, PaymentMethod } from "@/lib/domain/types";
@@ -65,7 +65,7 @@ async function assertCanIssue(orgId: string, documentType: DocumentType): Promis
     repositories.invoices.countIssuedBetween(orgId, from, to),
   ]);
 
-  const state = quotaState(resolvePlan(subscription.plan, subscription.status), issued);
+  const state = quotaState(planOf(subscription), issued);
   if (!state.allowed) throw new DomainError(quotaMessage(state));
 }
 

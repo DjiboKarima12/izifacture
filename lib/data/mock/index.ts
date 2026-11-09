@@ -204,7 +204,7 @@ const organizations: OrganizationRepo = {
   async getSubscription(orgId) {
     // Pas de ligne = plan gratuit, jamais une erreur : une organisation dont
     // l'abonnement n'a pas encore été créé doit pouvoir utiliser l'application.
-    return getMockDb().subscriptions.get(orgId) ?? { plan: "free", status: "active" };
+    return getMockDb().subscriptions.get(orgId) ?? { plan: "free", status: "active", currentPeriodEnd: null };
   },
 };
 
