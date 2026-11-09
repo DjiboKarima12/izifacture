@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     url: "/",
     title: TITRE,
     description: DESCRIPTION,
-    images: [{ url: "/og-v2.png", width: 1200, height: 630, alt: "MaMaFacture" }],
+    images: [{ url: "/og-v3.png", width: 1200, height: 630, alt: "MaMaFacture" }],
   },
 };
 
