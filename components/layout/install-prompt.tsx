@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Download, X } from "lucide-react";
 
-import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -79,31 +78,42 @@ export function InstallPrompt() {
     <div
       role="dialog"
       aria-label="Installer MaMaFacture"
-      className="fixed inset-x-4 bottom-4 z-50 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-raised animate-fade-in sm:left-auto sm:right-6 sm:w-[360px] print:hidden"
+      className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-raised animate-fade-in sm:left-auto sm:right-6 sm:w-[380px] print:hidden"
     >
-      <div className="flex items-start gap-3">
-        <Logo className="[&>span:last-child]:hidden" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Installer MaMaFacture</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gardez l&apos;application sur votre bureau : elle s&apos;ouvre d&apos;un clic, dans sa
-            propre fenêtre.
+      <button
+        type="button"
+        onClick={plusTard}
+        aria-label="Fermer"
+        className="absolute right-3 top-3 rounded-md p-1 text-sidebar-muted transition-colors hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+      >
+        <X className="size-4" aria-hidden />
+      </button>
+
+      <div className="flex items-center gap-4 p-5 pr-10">
+        <span
+          className="flex size-14 shrink-0 items-center justify-center rounded-md bg-sidebar-mark text-xl font-bold text-sidebar-mark-foreground shadow-card"
+          aria-hidden
+        >
+          MF
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold">Installer MaMaFacture</p>
+          <p className="mt-1 text-sm text-sidebar-muted">
+            Sur votre bureau, à un clic. L&apos;application demande toujours votre mot de passe
+            en s&apos;ouvrant.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={plusTard}
-          aria-label="Fermer"
-          className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <X className="size-4" aria-hidden />
-        </button>
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={plusTard}>
+
+      <div className="flex gap-2 border-t border-sidebar-border bg-sidebar-active px-5 py-3">
+        <Button variant="sidebar" size="sm" className="flex-1" onClick={plusTard}>
           Plus tard
         </Button>
-        <Button variant="secondary" size="sm" onClick={installer}>
+        <Button
+          size="sm"
+          className="flex-1 bg-sidebar-mark text-sidebar-mark-foreground hover:bg-sidebar-mark/90 focus-visible:ring-offset-sidebar"
+          onClick={installer}
+        >
           <Download className="size-4" aria-hidden />
           Installer
         </Button>

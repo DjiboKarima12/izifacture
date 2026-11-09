@@ -3,7 +3,7 @@
   "short_name": "MaMaFacture",
   "description": "Facture, devis, encaissement et reçu imprimé pour les commerces d'Afrique de l'Ouest.",
   "lang": "fr",
-  "start_url": "/dashboard",
+  "start_url": "/auth/app",
   "scope": "/",
   "display": "standalone",
   "background_color": "#2A2118",
