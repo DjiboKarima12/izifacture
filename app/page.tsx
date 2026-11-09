@@ -165,7 +165,7 @@ export default function HomePage() {
         Ici les rangées se posent sur quelque chose.
       */}
       <section className="bg-surface-strong">
-        <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-[1120px] px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-24">
           <Reveal>
             <h2 className="max-w-[20ch] text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
               Tout ce qu&apos;une caisse doit faire. Rien de plus.
@@ -183,7 +183,7 @@ export default function HomePage() {
         des sélecteurs de période et de devise, qui demandent un fond calme pour
         rester lisibles. Le détail des cartes vit dans `Tarifs`.
       */}
-      <section id="tarifs" className="mx-auto max-w-[1120px] px-4 pb-10 pt-16 sm:px-6 sm:pb-14 sm:pt-24">
+      <section id="tarifs" className="mx-auto max-w-[1120px] px-4 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16">
         <Reveal>
           <h2 className="tabular mx-auto max-w-[22ch] text-center text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
             {formatAmount(PREMIUM_MONTHLY_PRICE)} par mois, le jour où vous en aurez besoin.
