@@ -128,20 +128,32 @@ export default function HomePage() {
       {/* ================================================= Moyens de paiement */}
       <div className="border-b border-border bg-background">
         <Reveal className="mx-auto max-w-[1120px] px-4 py-8 sm:px-6">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Les paiements d&apos;ici
             </p>
-            <ul className="flex flex-wrap gap-2">
-              {PAYMENT_METHODS.map((method) => (
-                <li
-                  key={method}
-                  className="rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground"
-                >
-                  {PAYMENT_METHOD_LABELS[method]}
-                </li>
-              ))}
-            </ul>
+            {/*
+              Défilement en boucle (globals.css, « marquee »). La liste est
+              rendue deux fois ; la seconde copie est masquée aux lecteurs
+              d'écran, qui ne doivent entendre chaque moyen qu'une fois.
+            */}
+            <div className="marquee min-w-0 flex-1">
+              <div className="marquee-track">
+                {[false, true].map((copie) => (
+                  <ul key={String(copie)} className="flex shrink-0 gap-2 pr-2" aria-hidden={copie || undefined}>
+                    {[...PAYMENT_METHODS, ...PAYMENT_METHODS].map((method, index) => (
+                      <li
+                        key={`${method}-${index}`}
+                        aria-hidden={index >= PAYMENT_METHODS.length || undefined}
+                        className="whitespace-nowrap rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground"
+                      >
+                        {PAYMENT_METHOD_LABELS[method]}
+                      </li>
+                    ))}
+                  </ul>
+                ))}
+              </div>
+            </div>
           </div>
         </Reveal>
       </div>

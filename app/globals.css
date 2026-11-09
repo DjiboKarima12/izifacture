@@ -338,7 +338,44 @@
   }
 }
 
+/**
+ * Défilement en boucle des moyens de paiement, sur la vitrine seulement
+ * (exception du design system §2, décidée le 9 novembre 2026).
+ *
+ * La piste contient DEUX fois la même liste et glisse de la moitié de sa
+ * largeur : à la fin du tour, la seconde copie occupe exactement la place de la
+ * première, et la boucle repart sans saut visible.
+ *
+ * Le survol ou le focus clavier l'arrête, pour qu'on puisse lire. Sous
+ * `prefers-reduced-motion`, la règle globale plus bas la fige.
+ */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @layer utilities {
+  .marquee {
+    overflow: hidden;
+    /* Les bords s'effacent au lieu de couper net les pastilles. */
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+
   .animate-scan {
     position: absolute;
     top: 0;

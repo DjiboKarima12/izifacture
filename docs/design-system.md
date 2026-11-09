@@ -107,6 +107,10 @@ Cas particuliers admis : `transition-transform` sur le curseur d'un `Switch`,
 survolable, et `hover:-translate-y-1` sur les cartes de la **vitrine** — une ombre seule ne se
 remarque pas, alors qu'un déplacement dit que l'élément est vivant.
 
+La **vitrine** a aussi un défilement en boucle : la bande des moyens de paiement (`.marquee`,
+`globals.css`), décidé le 9 novembre 2026. Il s'arrête au survol et au focus, et se fige sous
+`prefers-reduced-motion`.
+
 **`animate-rise-in` est un amendement**, demandé par le propriétaire du produit le 11 septembre 2026.
 La version précédente de cette règle interdisait toute animation d'entrée sur du contenu de page —
 « le contenu apparaît, il ne se met pas en scène ». Ce qui la rend tenable :
