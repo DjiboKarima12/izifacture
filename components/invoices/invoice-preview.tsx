@@ -128,7 +128,7 @@ export function InvoicePreview({
   return (
     <article
       className={cn(
-        "mx-auto w-full max-w-[80mm] rounded-xl border border-border bg-card p-[6mm] font-mono text-[0.68rem] leading-tight shadow-card",
+        "mx-auto w-full max-w-[80mm] rounded-xl border border-border bg-card p-[6mm] font-mono text-card-foreground text-[0.68rem] leading-tight shadow-card",
         "print:w-[80mm] print:max-w-none print:rounded-none print:border-0 print:p-[5mm] print:shadow-none",
         className,
       )}
