@@ -257,7 +257,7 @@ Ils répondent à deux situations réelles et coexistent volontairement.
 
 | # | Exigence | État |
 |---|---|---|
-| EF-11.1 | Plan **gratuit** : 5 factures émises par mois calendaire | ✅ |
+| EF-11.1 | Offre gratuite = **essai de 15 jours** (5 factures émises au plus par mois), décidé le 9 novembre 2026. L'essai part de la création de l'organisation, jamais avant le 9 novembre 2026 pour les comptes déjà inscrits. Essai écoulé ou premium échu : émission refusée par la Server Action, et fenêtre « essai terminé » fermable à l'entrée dans l'application | ✅ |
 | EF-11.2 | Plan **premium** : 2 000 FCFA par mois ou 20 000 FCFA par an, sans limite | ⚠️ page `/abonnement` faite : la demande part sur WhatsApp et l'activation est **manuelle** (`docs/abonnement-manuel.md`) ; aucun prestataire Mobile Money branché (§11.2) |
 | EF-11.9 | Une période payée **échue** retombe sur gratuit d'elle-même, d'après `current_period_end` | ✅ |
 | EF-11.3 | Le quota compte les **factures émises** : un brouillon, un devis ou un avoir ne consomment rien. Un devis ne prouve aucune vente ; bloquer la correction d'une erreur derrière un paiement serait indéfendable | ✅ |

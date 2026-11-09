@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Plan } from "@/lib/plan";
 
 const LABELS: Record<Plan, string> = {
-  free: "Gratuit",
+  free: "Essai",
   premium: "Premium",
 };
 

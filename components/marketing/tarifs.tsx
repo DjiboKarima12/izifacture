@@ -7,7 +7,7 @@ import { Check, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/marketing/reveal";
 import { Button } from "@/components/ui/button";
 import { premiumSignupPath } from "@/lib/billing";
-import { FREE_MONTHLY_QUOTA } from "@/lib/plan";
+import { FREE_MONTHLY_QUOTA, TRIAL_DAYS } from "@/lib/plan";
 import {
   ANNUAL_MONTHS_FREE,
   DISPLAY_CURRENCIES,
@@ -34,7 +34,8 @@ import { cn } from "@/lib/utils";
  */
 
 const LIGNES_GRATUIT = [
-  `${FREE_MONTHLY_QUOTA} factures par mois`,
+  `${TRIAL_DAYS} jours pour essayer`,
+  `Jusqu'à ${FREE_MONTHLY_QUOTA} factures`,
   "Reçus imprimés et PDF",
   "Clients et encaissements",
   "Tableau de bord",
@@ -46,7 +47,7 @@ const LIGNES_PREMIUM = [
   "Catalogue produits et douchette",
   "Plusieurs utilisateurs sur la même boutique",
   "Support par WhatsApp",
-  "Tout ce que contient le plan gratuit",
+  "Tout ce que contient l'essai",
 ];
 
 const PERIODES: { value: BillingPeriod; label: string }[] = [
@@ -113,10 +114,15 @@ export function Tarifs() {
         {/* ---------------------------------------------------- Gratuit */}
         <Reveal delay={80}>
           <div className="rounded-3xl border border-border bg-card px-7 pb-8 pt-11 shadow-card sm:px-9">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Gratuit</h3>
-            <p className="mt-2 text-muted-foreground">Pour démarrer sans rien payer.</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Essai gratuit</h3>
+            <p className="mt-2 text-muted-foreground">Pour découvrir l&apos;application.</p>
 
-            <Prix montant={0} devise={devise} suffixe="pour toujours" mutedClassName="text-muted-foreground" />
+            <Prix
+              montant={0}
+              devise={devise}
+              suffixe={`pendant ${TRIAL_DAYS} jours`}
+              mutedClassName="text-muted-foreground"
+            />
             <p className="mt-2 min-h-5" aria-hidden />
 
             <Separation className="border-border" />
@@ -124,7 +130,7 @@ export function Tarifs() {
             <Lignes lignes={LIGNES_GRATUIT} pastilleClassName="bg-accent text-accent-foreground" />
 
             <Button asChild size="lg" variant="outline" className="mt-9 w-full rounded-full">
-              <Link href="/signup">Commencer gratuitement</Link>
+              <Link href="/signup">Commencer l&apos;essai</Link>
             </Button>
           </div>
         </Reveal>

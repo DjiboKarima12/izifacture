@@ -94,6 +94,44 @@ export function monthBounds(reference: IsoDate = todayIso()): { from: IsoDate; t
   return { from, to: addMonths(from, 1) };
 }
 
+/* ------------------------------------------------------------ Essai */
+
+/**
+ * L'offre gratuite est un ESSAI : quinze jours, toujours plafonnés à
+ * `FREE_MONTHLY_QUOTA` factures. Passé ce délai, l'émission est refusée et
+ * l'application propose le premium ; les données restent consultables.
+ *
+ * L'essai part de la création de l'organisation — mais jamais avant
+ * `TRIAL_LAUNCH`, le jour où l'essai a remplacé le gratuit illimité. Sans ce
+ * plancher, les comptes déjà inscrits auraient été bloqués à la mise en ligne,
+ * sans avoir jamais été prévenus.
+ */
+export const TRIAL_DAYS = 15;
+export const TRIAL_LAUNCH = "2026-11-09T00:00:00Z";
+
+const DAY_MS = 86_400_000;
+
+export type TrialState = {
+  endsAt: Date;
+  /** Jours restants, arrondis au jour entamé. 0 une fois terminé. */
+  daysLeft: number;
+  expired: boolean;
+};
+
+export function trialState(orgCreatedAt: string, now: Date = new Date()): TrialState {
+  const created = Date.parse(orgCreatedAt);
+  const start = Math.max(Number.isNaN(created) ? 0 : created, Date.parse(TRIAL_LAUNCH));
+  const endsAt = start + TRIAL_DAYS * DAY_MS;
+  const remaining = endsAt - now.getTime();
+  return {
+    endsAt: new Date(endsAt),
+    daysLeft: Math.max(0, Math.ceil(remaining / DAY_MS)),
+    expired: remaining <= 0,
+  };
+}
+
+/* ------------------------------------------------------------ Quota */
+
 export type QuotaState = {
   plan: Plan;
   /** `null` sur un plan sans limite. */
@@ -105,14 +143,28 @@ export type QuotaState = {
   allowed: boolean;
   /** Le quota est atteint : c'est le moment de proposer le premium. */
   reached: boolean;
+  /** L'essai est terminé : plus aucune émission sans premium. */
+  trialExpired: boolean;
 };
 
-export function quotaState(plan: Plan, issuedThisMonth: number): QuotaState {
+export function quotaState(
+  plan: Plan,
+  issuedThisMonth: number,
+  trialExpired = false,
+): QuotaState {
   const limit = monthlyQuota(plan);
   const used = Math.max(0, Math.trunc(issuedThisMonth));
 
   if (limit === null) {
-    return { plan, limit: null, used, remaining: null, allowed: true, reached: false };
+    return {
+      plan,
+      limit: null,
+      used,
+      remaining: null,
+      allowed: true,
+      reached: false,
+      trialExpired: false,
+    };
   }
 
   const remaining = Math.max(0, limit - used);
@@ -122,15 +174,22 @@ export function quotaState(plan: Plan, issuedThisMonth: number): QuotaState {
     limit,
     used,
     remaining,
-    allowed: remaining > 0,
+    allowed: remaining > 0 && !trialExpired,
     reached: remaining === 0,
+    trialExpired,
   };
 }
 
 /** Message affiché à l'utilisateur quand l'émission est refusée. */
 export function quotaMessage(state: QuotaState): string {
+  if (state.trialExpired) {
+    return (
+      `Votre essai gratuit de ${TRIAL_DAYS} jours est terminé. ` +
+      "Passez au premium pour continuer à émettre des factures — vos clients et documents sont conservés."
+    );
+  }
   return (
-    `Vous avez émis ${state.used} factures ce mois-ci, la limite du plan gratuit. ` +
+    `Vous avez émis ${state.used} factures ce mois-ci, la limite de l'essai gratuit. ` +
     "Passez au premium pour en émettre sans limite — vos brouillons sont conservés."
   );
 }

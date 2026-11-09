@@ -11,7 +11,7 @@ import {
   paymentInputSchema,
 } from "@/lib/domain/schemas";
 import { settleAtCounter } from "@/lib/payments";
-import { monthBounds, planOf, quotaMessage, quotaState } from "@/lib/plan";
+import { monthBounds, planOf, quotaMessage, quotaState, trialState } from "@/lib/plan";
 import { amountDue } from "@/lib/tax";
 import { todayIso } from "@/lib/dates";
 import type { DocumentType, IsoDate, PaymentMethod } from "@/lib/domain/types";
@@ -60,12 +60,15 @@ async function assertCanIssue(orgId: string, documentType: DocumentType): Promis
   const { from, to } = monthBounds();
 
   // En parallèle : deux allers-retours réseau, mais un seul temps d'attente.
-  const [subscription, issued] = await Promise.all([
+  const [subscription, issued, organization] = await Promise.all([
     repositories.organizations.getSubscription(orgId),
     repositories.invoices.countIssuedBetween(orgId, from, to),
+    repositories.organizations.get(orgId),
   ]);
 
-  const state = quotaState(planOf(subscription), issued);
+  // Organisation introuvable : l'essai est réputé terminé plutôt qu'ouvert.
+  const trialExpired = organization ? trialState(organization.createdAt).expired : true;
+  const state = quotaState(planOf(subscription), issued, trialExpired);
   if (!state.allowed) throw new DomainError(quotaMessage(state));
 }
 

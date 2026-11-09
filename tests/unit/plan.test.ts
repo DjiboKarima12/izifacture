@@ -7,7 +7,11 @@ import {
   monthKey,
   monthlyQuota,
   planOf,
+  quotaMessage,
   quotaState,
+  TRIAL_DAYS,
+  TRIAL_LAUNCH,
+  trialState,
   resolvePlan,
 } from "@/lib/plan";
 
@@ -138,5 +142,47 @@ describe("quotaState", () => {
   it("traite un compteur absurde comme zéro plutôt que d'ouvrir la porte", () => {
     expect(quotaState("free", -10).used).toBe(0);
     expect(quotaState("free", -10).remaining).toBe(5);
+  });
+});
+
+describe("trialState", () => {
+  it("dure quinze jours à partir de la création", () => {
+    const created = "2026-12-01T10:00:00Z";
+    expect(trialState(created, new Date("2026-12-01T10:00:00Z"))).toMatchObject({
+      daysLeft: TRIAL_DAYS,
+      expired: false,
+    });
+    expect(trialState(created, new Date("2026-12-15T11:00:00Z")).daysLeft).toBe(1);
+    expect(trialState(created, new Date("2026-12-16T10:00:00Z"))).toMatchObject({
+      daysLeft: 0,
+      expired: true,
+    });
+  });
+
+  /**
+   * Les comptes inscrits avant l'arrivée de l'essai n'ont jamais été prévenus :
+   * leur essai part du lancement, pas de leur inscription.
+   */
+  it("fait partir les comptes anciens du lancement de l'essai", () => {
+    const state = trialState("2026-09-01T00:00:00Z", new Date("2026-11-10T00:00:00Z"));
+    expect(state.expired).toBe(false);
+    expect(state.endsAt.toISOString()).toBe("2026-11-24T00:00:00.000Z");
+  });
+
+  it("traite une date illisible comme une inscription au lancement", () => {
+    expect(trialState("n'importe quoi", new Date(TRIAL_LAUNCH)).daysLeft).toBe(TRIAL_DAYS);
+  });
+});
+
+describe("quotaState pendant et après l'essai", () => {
+  it("refuse toute émission une fois l'essai terminé, même sous le quota", () => {
+    const state = quotaState("free", 0, true);
+    expect(state.allowed).toBe(false);
+    expect(state.trialExpired).toBe(true);
+    expect(quotaMessage(state)).toContain("essai gratuit");
+  });
+
+  it("ignore la fin d'essai pour le premium", () => {
+    expect(quotaState("premium", 0, true).allowed).toBe(true);
   });
 });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { TrialEndedDialog } from "@/components/billing/trial-ended-dialog";
 import { Logo } from "@/components/layout/logo";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { PlanBadge } from "@/components/layout/plan-badge";
@@ -7,7 +8,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TopSearch } from "@/components/layout/top-search";
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
-import { planOf } from "@/lib/plan";
+import { planOf, trialState } from "@/lib/plan";
 import { supabaseDataEnabled } from "@/lib/supabase/env";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
    */
   const subscription = await repositories.organizations.getSubscription(session.orgId);
   const plan = planOf(subscription);
+  // Hors premium actif, l'essai écoulé (ou le premium échu) ouvre la fenêtre
+  // qui propose l'abonnement. Elle informe ; la barrière est dans assertCanIssue.
+  const termine = plan === "free" && trialState(session.organization.createdAt).expired;
   const canSignOut = supabaseDataEnabled();
 
   return (
@@ -55,6 +59,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
         {children}
       </div>
+      {termine ? (
+        <TrialEndedDialog reason={subscription.plan === "premium" ? "premium" : "trial"} />
+      ) : null}
     </div>
   );
 }

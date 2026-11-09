@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
 import { formatDateLong, toIsoDate } from "@/lib/dates";
-import { monthBounds, planOf, quotaState } from "@/lib/plan";
+import { monthBounds, planOf, quotaState, trialState } from "@/lib/plan";
 import type { BillingPeriod } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Abonnement" };
@@ -35,7 +35,8 @@ export default async function AbonnementPage({
   ]);
 
   const plan = planOf(subscription);
-  const quota = quotaState(plan, issued);
+  const trial = trialState(session.organization.createdAt);
+  const quota = quotaState(plan, issued, trial.expired);
   const finPeriode =
     plan === "premium" && subscription.currentPeriodEnd
       ? formatDateLong(toIsoDate(new Date(subscription.currentPeriodEnd)))
@@ -61,7 +62,12 @@ export default async function AbonnementPage({
           </p>
         ) : (
           <>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-3 text-sm font-medium">
+              {trial.expired
+                ? "Votre essai gratuit est terminé : l'émission de factures est suspendue."
+                : `Essai gratuit : ${trial.daysLeft} jour${trial.daysLeft > 1 ? "s" : ""} restant${trial.daysLeft > 1 ? "s" : ""}, jusqu'au ${formatDateLong(toIsoDate(trial.endsAt))}.`}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
               <span className="tabular font-semibold text-foreground">
                 {quota.used} / {quota.limit}
               </span>{" "}

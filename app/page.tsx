@@ -8,7 +8,7 @@ import { ReceiptDemo } from "@/components/marketing/receipt-demo";
 import { Reveal } from "@/components/marketing/reveal";
 import { Tarifs } from "@/components/marketing/tarifs";
 import { Button } from "@/components/ui/button";
-import { FREE_MONTHLY_QUOTA } from "@/lib/plan";
+import { TRIAL_DAYS } from "@/lib/plan";
 import { formatAmount } from "@/lib/money";
 import { PREMIUM_MONTHLY_PRICE } from "@/lib/pricing";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     "Facture, devis, encaissement et reçu imprimé pour les commerces d'Afrique de l'Ouest. " +
     "Scannez vos produits, rendez la monnaie, imprimez le ticket. " +
-    "Gratuit jusqu'à cinq factures par mois.",
+    `Essai gratuit de ${TRIAL_DAYS} jours, sans carte bancaire.`,
 };
 
 /**
@@ -92,7 +92,7 @@ export default function HomePage() {
                 <div className="mt-9 flex flex-wrap items-center gap-3">
                   <Button asChild size="lg">
                     <Link href="/signup">
-                      Créer mon compte gratuitement
+                      Essayer gratuitement
                       <ArrowRight aria-hidden />
                     </Link>
                   </Button>
@@ -107,7 +107,7 @@ export default function HomePage() {
 
               <Reveal delay={360}>
                 <p className="mt-5 text-sm text-sidebar-muted">
-                  {FREE_MONTHLY_QUOTA} factures par mois offertes. Sans carte bancaire.
+                  {TRIAL_DAYS} jours d&apos;essai gratuit. Sans carte bancaire.
                 </p>
               </Reveal>
             </div>
@@ -177,8 +177,8 @@ export default function HomePage() {
             {formatAmount(PREMIUM_MONTHLY_PRICE)} par mois, le jour où vous en aurez besoin.
           </h2>
           <p className="mx-auto mt-5 max-w-[52ch] text-center text-muted-foreground">
-            Pas d&apos;engagement, pas de carte bancaire. Vous passez au premium quand les{" "}
-            {FREE_MONTHLY_QUOTA} factures gratuites ne suffisent plus — pas avant.
+            Essayez {TRIAL_DAYS} jours gratuitement, sans carte bancaire. Ensuite, le
+            Premium pour continuer — sans engagement, payé par Mobile Money.
           </p>
         </Reveal>
 
