@@ -193,3 +193,46 @@ export function quotaMessage(state: QuotaState): string {
     "Passez au premium pour en émettre sans limite — vos brouillons sont conservés."
   );
 }
+
+/* ------------------------------------------------------------ Rappel */
+
+/** Jours avant la fin de l'essai où l'application commence à prévenir. */
+export const TRIAL_REMINDER_DAYS = 3;
+/** Jours avant la fin d'une période premium payée où l'on rappelle de renouveler. */
+export const PREMIUM_REMINDER_DAYS = 5;
+
+export type PlanReminder = {
+  kind: "trial" | "premium";
+  /** Jours restants, arrondis au jour entamé — jamais 0 : à 0, c'est la fenêtre de fin qui parle. */
+  daysLeft: number;
+  endsAt: Date;
+};
+
+/**
+ * Faut-il prévenir que l'accès va bientôt s'arrêter ?
+ *
+ * Le pendant, AVANT l'échéance, de la fenêtre « essai terminé » : sans lui, le
+ * premier signe d'une fin d'essai ou d'un mois payé écoulé serait un refus
+ * d'émettre en plein comptoir. Un premium sans date de fin ne s'arrête jamais,
+ * il n'y a donc rien à rappeler.
+ */
+export function planReminder(
+  subscription: SubscriptionInfo,
+  orgCreatedAt: string,
+  now: Date = new Date(),
+): PlanReminder | null {
+  const plan = planOf(subscription, now);
+
+  if (plan === "premium") {
+    if (subscription.currentPeriodEnd === null) return null;
+    const endsAt = Date.parse(subscription.currentPeriodEnd);
+    const daysLeft = Math.ceil((endsAt - now.getTime()) / DAY_MS);
+    return daysLeft <= PREMIUM_REMINDER_DAYS
+      ? { kind: "premium", daysLeft, endsAt: new Date(endsAt) }
+      : null;
+  }
+
+  const trial = trialState(orgCreatedAt, now);
+  if (trial.expired || trial.daysLeft > TRIAL_REMINDER_DAYS) return null;
+  return { kind: "trial", daysLeft: trial.daysLeft, endsAt: trial.endsAt };
+}

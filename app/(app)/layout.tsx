@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PlanReminderBanner } from "@/components/billing/plan-reminder-banner";
 import { TrialEndedDialog } from "@/components/billing/trial-ended-dialog";
 import { Logo } from "@/components/layout/logo";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -8,7 +9,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TopSearch } from "@/components/layout/top-search";
 import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
-import { planOf, trialState } from "@/lib/plan";
+import { planOf, planReminder, trialState } from "@/lib/plan";
 import { supabaseDataEnabled } from "@/lib/supabase/env";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Hors premium actif, l'essai écoulé (ou le premium échu) ouvre la fenêtre
   // qui propose l'abonnement. Elle informe ; la barrière est dans assertCanIssue.
   const termine = plan === "free" && trialState(session.organization.createdAt).expired;
+  // Quelques jours avant l'échéance, un bandeau prévient : la fenêtre de fin ne
+  // doit pas être le premier signe que l'accès s'arrête.
+  const reminder = planReminder(subscription, session.organization.createdAt);
   const canSignOut = supabaseDataEnabled();
 
   return (
@@ -57,6 +61,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
+        {reminder ? <PlanReminderBanner reminder={reminder} /> : null}
         {children}
       </div>
       {termine ? (

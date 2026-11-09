@@ -7,6 +7,7 @@ import {
   monthKey,
   monthlyQuota,
   planOf,
+  planReminder,
   quotaMessage,
   quotaState,
   TRIAL_DAYS,
@@ -184,5 +185,39 @@ describe("quotaState pendant et après l'essai", () => {
 
   it("ignore la fin d'essai pour le premium", () => {
     expect(quotaState("premium", 0, true).allowed).toBe(true);
+  });
+});
+
+describe("planReminder", () => {
+  const created = "2026-12-01T10:00:00Z";
+  const free = { plan: "free", status: "active", currentPeriodEnd: null };
+
+  it("se tait pendant le début de l'essai", () => {
+    expect(planReminder(free, created, new Date("2026-12-05T10:00:00Z"))).toBeNull();
+  });
+
+  it("prévient dans les trois derniers jours de l'essai", () => {
+    expect(planReminder(free, created, new Date("2026-12-13T11:00:00Z"))).toMatchObject({
+      kind: "trial",
+      daysLeft: 3,
+    });
+  });
+
+  it("laisse la fenêtre de fin parler une fois l'essai terminé", () => {
+    expect(planReminder(free, created, new Date("2026-12-17T10:00:00Z"))).toBeNull();
+  });
+
+  it("rappelle de renouveler dans les cinq derniers jours du premium", () => {
+    const premium = { plan: "premium", status: "active", currentPeriodEnd: "2027-01-10T00:00:00Z" };
+    expect(planReminder(premium, created, new Date("2027-01-01T00:00:00Z"))).toBeNull();
+    expect(planReminder(premium, created, new Date("2027-01-06T12:00:00Z"))).toMatchObject({
+      kind: "premium",
+      daysLeft: 4,
+    });
+  });
+
+  it("ne rappelle rien pour un premium sans échéance", () => {
+    const premium = { plan: "premium", status: "active", currentPeriodEnd: null };
+    expect(planReminder(premium, created, new Date("2027-01-06T12:00:00Z"))).toBeNull();
   });
 });
