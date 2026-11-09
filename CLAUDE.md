@@ -25,6 +25,7 @@ Les huit règles qu'on enfreint le plus souvent, à connaître sans ouvrir le do
    Aucune bordure ne prend une couleur de marque ou de statut.
 4. **Rayons** : `rounded-xl` cartes · `rounded-lg` boutons et champs · `rounded-md` pastilles, icônes
    et éléments de nav · `rounded-full` avatars. `rounded` nu et `rounded-2xl` sont refusés.
+   La **vitrine** fait exception : cartes de tarifs en `rounded-3xl`, sélecteurs et appels en pilule.
 5. **Ombres** : `shadow-card` (au repos) ou `shadow-raised` (flottant). Rien d'autre.
 6. **Animations** : `animate-fade-in` / `animate-overlay-in` (180 ms) pour les surfaces flottantes,
    `transition-colors` pour les états, `animate-rise-in` (240 ms) pour l'entrée du contenu au

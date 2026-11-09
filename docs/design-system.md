@@ -215,6 +215,12 @@ focus-visible:ring-1`.
 
 `rounded` nu (4 px, hors échelle), `rounded-2xl` et `rounded-3xl` sont refusés par le vérificateur.
 
+**Exception de la vitrine** (`app/page.tsx`, `components/marketing/`), décidée par le propriétaire du
+produit le 9 novembre 2026 : les grandes cartes de tarifs y prennent `rounded-3xl`, et les sélecteurs
+et boutons d'appel la forme pilule (`rounded-full`). Une page qu'on ne voit qu'une fois peut se
+permettre une forme plus douce que l'application, où l'on travaille toute la journée. Le vérificateur
+n'admet `rounded-3xl` que dans ces fichiers.
+
 ### Ombres
 
 Deux, et elles portent une intention :

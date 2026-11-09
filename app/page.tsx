@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Barcode, Check, FileText, Hash, Printer, Wallet } from "lucide-react";
+import { ArrowRight, Barcode, FileText, Hash, Printer, Wallet } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
 import { Atouts } from "@/components/marketing/atouts";
 import { ReceiptDemo } from "@/components/marketing/receipt-demo";
 import { Reveal } from "@/components/marketing/reveal";
+import { Tarifs } from "@/components/marketing/tarifs";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { FREE_MONTHLY_QUOTA } from "@/lib/plan";
 import { formatAmount } from "@/lib/money";
+import { PREMIUM_MONTHLY_PRICE } from "@/lib/pricing";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
 import { PAYMENT_METHODS } from "@/lib/domain/types";
 
@@ -37,7 +38,6 @@ export const metadata: Metadata = {
  * n'est inventée pour cette page.
  */
 
-const PRIX_PREMIUM = 2_000;
 const DEVISE = "XOF" as const;
 
 export default function HomePage() {
@@ -166,120 +166,32 @@ export default function HomePage() {
 
       {/* ============================================================ Tarifs */}
       {/*
-        BANDE SOMBRE, comme le haut de la page. Deux cartes claires côte à côte
-        sur fond clair donnaient deux rectangles sans hiérarchie : rien ne disait
-        laquelle regarder, et la section entière disparaissait dans le blanc.
-
-        Ici le fond bascule sur le brun de la barre latérale, et les deux formules
-        s'y posent différemment. Le gratuit reste DANS la bande — bordé, à peine
-        détaché, il appartient au fond. Le premium en SORT : carte crème, ombre
-        portée, il flotte au-dessus. La hiérarchie passe par la profondeur, pas
-        par une bordure de marque, que le système refuse.
-
-        Le gratuit garde pour autant sa liste complète et son bouton : il est
-        discret, pas escamoté. C'est l'offre par laquelle presque tout le monde
-        entrera.
+        SUR FOND CLAIR, et c'est la carte du premium qui porte le sombre. La
+        version précédente posait tout sur une bande brune ; la grille a depuis
+        des sélecteurs de période et de devise, qui demandent un fond calme pour
+        rester lisibles. Le détail des cartes vit dans `Tarifs`.
       */}
-      <section id="tarifs" className="bg-sidebar text-sidebar-foreground">
-        <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
-          <Reveal>
-            <h2 className="tabular max-w-[18ch] text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-              {formatAmount(PRIX_PREMIUM, DEVISE)} par mois, le jour où vous en aurez besoin.
-            </h2>
-            <p className="mt-5 max-w-[52ch] text-sidebar-muted">
-              Pas d&apos;engagement, pas de carte bancaire. Vous passez au premium quand les{" "}
-              {FREE_MONTHLY_QUOTA} factures gratuites ne suffisent plus — pas avant.
-            </p>
-          </Reveal>
+      <section id="tarifs" className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
+        <Reveal>
+          <h2 className="tabular mx-auto max-w-[22ch] text-center text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+            {formatAmount(PREMIUM_MONTHLY_PRICE)} par mois, le jour où vous en aurez besoin.
+          </h2>
+          <p className="mx-auto mt-5 max-w-[52ch] text-center text-muted-foreground">
+            Pas d&apos;engagement, pas de carte bancaire. Vous passez au premium quand les{" "}
+            {FREE_MONTHLY_QUOTA} factures gratuites ne suffisent plus — pas avant.
+          </p>
+        </Reveal>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-2 lg:items-start">
-            {/* ------------------------------------------------------ Gratuit */}
-            <Reveal>
-              <div className="h-full rounded-xl border border-sidebar-border bg-sidebar-active p-7">
-                <h3 className="text-base font-semibold">Gratuit</h3>
-                <p className="tabular mt-4 text-4xl font-bold tracking-tight">
-                  {formatAmount(0, DEVISE)}
-                </p>
-                <p className="mt-1.5 text-sm text-sidebar-muted">Pour toujours.</p>
-
-                <ul className="mt-7 space-y-3 text-sm">
-                  {[
-                    `${FREE_MONTHLY_QUOTA} factures par mois`,
-                    "Reçus imprimés et PDF",
-                    "Clients et encaissements",
-                    "Tableau de bord",
-                  ].map((ligne) => (
-                    <li key={ligne} className="flex items-start gap-2.5">
-                      {/*
-                        L'or de la marque, et non le vert des statuts : sur le
-                        brun, ce vert-là tombe sous le seuil de lisibilité.
-                      */}
-                      <Check className="mt-0.5 size-4 shrink-0 text-sidebar-mark" aria-hidden />
-                      {ligne}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button asChild variant="sidebar" className="mt-8 w-full">
-                  <Link href="/signup">Commencer gratuitement</Link>
-                </Button>
-              </div>
-            </Reveal>
-
-            {/* ------------------------------------------------------ Premium */}
-            <Reveal delay={80}>
-              {/* `shadow-raised` et rien d'autre : c'est l'ombre qui décolle la
-                  carte du fond sombre. Une bordure colorée est refusée. */}
-              <Card className="shadow-raised h-full p-7">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-base font-semibold">Premium</h3>
-                  <span className="rounded-md bg-accent px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-accent-foreground">
-                    Sans limite
-                  </span>
-                </div>
-
-                <p className="tabular mt-4 text-4xl font-bold tracking-tight">
-                  {formatAmount(PRIX_PREMIUM, DEVISE)}
-                </p>
-                <p className="mt-1.5 text-sm text-muted-foreground">par mois.</p>
-
-                <ul className="mt-7 space-y-3 text-sm">
-                  {[
-                    "Factures sans limite",
-                    "Devis et avoirs",
-                    "Catalogue produits et douchette",
-                    "Plusieurs utilisateurs sur la même boutique",
-                    "Support par WhatsApp",
-                    "Tout ce que contient le plan gratuit",
-                  ].map((ligne) => (
-                    <li key={ligne} className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-status-paid" aria-hidden />
-                      {ligne}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button asChild className="mt-8 w-full">
-                  <Link href="/signup">Créer mon compte</Link>
-                </Button>
-
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Au-delà du quota gratuit, vos brouillons sont conservés. Rien n&apos;est perdu.
-                </p>
-              </Card>
-            </Reveal>
-          </div>
+        <div className="mt-10">
+          <Tarifs />
         </div>
       </section>
 
       {/* =========================================================== Contact */}
       {/*
-        CE BLOC ÉTAIT SOMBRE LUI AUSSI. Depuis que les tarifs occupent une bande
-        brune pleine largeur, un second brun juste en dessous se lisait comme un
-        écho : la moitié basse de la page devenait une suite de rectangles
-        foncés, et la bande des tarifs perdait ce qui en faisait l'accent.
-
-        Le sombre reste donc réservé à deux moments — l'ouverture et le prix.
+        CE BLOC ÉTAIT SOMBRE. Une suite de surfaces brunes se lisait comme un
+        écho, et chacune perdait ce qui en faisait l'accent. Le sombre reste
+        réservé à deux moments : l'ouverture, et la carte du premium.
       */}
       <section className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
         <Reveal>

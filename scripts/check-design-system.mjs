@@ -175,10 +175,13 @@ const CLASS_RULES = [
   },
   {
     id: "radius-scale",
-    test: (token) => {
+    test: (token, file) => {
       const utility = token.replace(/^.*:/, "");
       if (!/^rounded(?:-|$)/.test(utility)) return false;
       if (/^rounded-\[/.test(utility)) return true;
+      // Exception de la vitrine (design system §4, « Rayons ») : les grandes
+      // cartes y prennent rounded-3xl. Partout ailleurs, l'échelle normale.
+      if (isVitrine(file) && /^rounded-3xl$/.test(utility)) return false;
       return !/^rounded(?:-(?:t|b|l|r|tl|tr|bl|br|s|e|ss|se|es|ee))?-(?:sm|md|lg|xl|full|none)$/.test(
         utility,
       );
@@ -187,6 +190,11 @@ const CLASS_RULES = [
     fix: "Échelle dérivée de --radius : rounded-sm | rounded-md | rounded-lg | rounded-xl | rounded-full. `rounded` nu et rounded-2xl/3xl sont exclus.",
   },
 ];
+
+/** La vitrine publique : page d'accueil et ses composants. */
+function isVitrine(file) {
+  return file === "app/page.tsx" || file.startsWith("components/marketing/");
+}
 
 /* --------------------------------------------------------------- Analyse */
 
@@ -217,7 +225,7 @@ function checkFile(absolutePath) {
       for (const token of literal.split(/\s+/)) {
         if (!token) continue;
         for (const rule of CLASS_RULES) {
-          if (rule.test(token)) {
+          if (rule.test(token, relativePath)) {
             violations.push({
               file: relativePath,
               line: lineNumber,
