@@ -53,9 +53,13 @@ function failure(error: unknown): ActionResult<never> {
  * Seules les FACTURES sont comptées. Un devis ne prouve aucune vente, et un
  * avoir est une correction souvent imposée par la réglementation : bloquer la
  * correction d'une erreur derrière un paiement serait indéfendable.
+ *
+ * L'avoir passe donc toujours. Le devis, lui, ne consomme rien pendant l'essai
+ * mais s'arrête avec lui : sans quoi l'essai terminé laisserait un outil de
+ * devis gratuit à vie, alors que le devis fait partie du Premium.
  */
 async function assertCanIssue(orgId: string, documentType: DocumentType): Promise<void> {
-  if (documentType !== "invoice") return;
+  if (documentType === "credit_note") return;
 
   const { from, to } = monthBounds();
 
@@ -69,6 +73,11 @@ async function assertCanIssue(orgId: string, documentType: DocumentType): Promis
   // Organisation introuvable : l'essai est réputé terminé plutôt qu'ouvert.
   const trialExpired = organization ? trialState(organization.createdAt).expired : true;
   const state = quotaState(planOf(subscription), issued, trialExpired);
+
+  if (documentType === "quote") {
+    if (state.trialExpired) throw new DomainError(quotaMessage(state));
+    return;
+  }
   if (!state.allowed) throw new DomainError(quotaMessage(state));
 }
 

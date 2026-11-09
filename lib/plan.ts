@@ -185,7 +185,7 @@ export function quotaMessage(state: QuotaState): string {
   if (state.trialExpired) {
     return (
       `Votre essai gratuit de ${TRIAL_DAYS} jours est terminé. ` +
-      "Passez au premium pour continuer à émettre des factures — vos clients et documents sont conservés."
+      "Passez au premium pour continuer à émettre factures et devis — vos clients et documents sont conservés."
     );
   }
   return (
