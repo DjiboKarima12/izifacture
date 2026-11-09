@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Atkinson_Hyperlegible, Inter, Outfit, Source_Serif_4 } from "next/font/google";
+import { InstallPrompt } from "@/components/layout/install-prompt";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -52,6 +53,10 @@ export const metadata: Metadata = {
     template: "%s · MaMaFacture",
   },
   description: "La facturation simple pour les entrepreneurs africains.",
+  // Le manifeste rend le site INSTALLABLE : Chrome et Edge proposent alors de
+  // le poser sur le bureau, où il s'ouvre dans sa propre fenêtre, sans barre
+  // d'adresse. Il vit dans public/ en JSON, couleurs comprises.
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -109,7 +114,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <InstallPrompt />
+      </body>
     </html>
   );
 }
