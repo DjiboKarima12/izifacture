@@ -14,12 +14,27 @@ import { PREMIUM_MONTHLY_PRICE } from "@/lib/pricing";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
 import { PAYMENT_METHODS } from "@/lib/domain/types";
 
+const TITRE = "MaMaFacture — Facturez au comptoir, reçu en main";
+const DESCRIPTION =
+  "Facture, devis, encaissement et reçu imprimé pour les commerces d'Afrique de l'Ouest. " +
+  "Scannez vos produits, rendez la monnaie, imprimez le ticket. " +
+  `Essai gratuit de ${TRIAL_DAYS} jours, sans carte bancaire.`;
+
+// `openGraph` d'une page REMPLACE celui du layout au lieu de s'y fusionner :
+// l'image est donc répétée ici, sinon l'aperçu partagé la perdrait.
 export const metadata: Metadata = {
-  title: "MaMaFacture — Facturez au comptoir, reçu en main",
-  description:
-    "Facture, devis, encaissement et reçu imprimé pour les commerces d'Afrique de l'Ouest. " +
-    "Scannez vos produits, rendez la monnaie, imprimez le ticket. " +
-    `Essai gratuit de ${TRIAL_DAYS} jours, sans carte bancaire.`,
+  title: TITRE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "MaMaFacture",
+    url: "/",
+    title: TITRE,
+    description: DESCRIPTION,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "MaMaFacture" }],
+  },
 };
 
 /**

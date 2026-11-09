@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Atkinson_Hyperlegible, Inter, Outfit, Source_Serif_4 } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 /**
@@ -39,12 +40,25 @@ const lisible = Atkinson_Hyperlegible({
   display: "swap",
 });
 
+/**
+ * `metadataBase` rend absolues les adresses d'aperçu : WhatsApp et Facebook
+ * ignorent une image donnée en chemin relatif, et le lien partagé s'affiche
+ * alors sans visuel.
+ */
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "MaMaFacture",
     template: "%s · MaMaFacture",
   },
   description: "La facturation simple pour les entrepreneurs africains.",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "MaMaFacture",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "MaMaFacture" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 /**
