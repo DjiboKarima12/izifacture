@@ -171,7 +171,7 @@ export default function HomePage() {
         des sélecteurs de période et de devise, qui demandent un fond calme pour
         rester lisibles. Le détail des cartes vit dans `Tarifs`.
       */}
-      <section id="tarifs" className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
+      <section id="tarifs" className="mx-auto max-w-[1120px] px-4 pb-10 pt-16 sm:px-6 sm:pb-14 sm:pt-24">
         <Reveal>
           <h2 className="tabular mx-auto max-w-[22ch] text-center text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
             {formatAmount(PREMIUM_MONTHLY_PRICE)} par mois, le jour où vous en aurez besoin.
@@ -193,9 +193,9 @@ export default function HomePage() {
         écho, et chacune perdait ce qui en faisait l'accent. Le sombre reste
         réservé à deux moments : l'ouverture, et la carte du premium.
       */}
-      <section className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-24">
+      <section className="mx-auto max-w-[1120px] px-4 pb-12 sm:px-6 sm:pb-16">
         <Reveal>
-          <div className="rounded-xl border border-border bg-surface p-8 shadow-card sm:p-12">
+          <div className="rounded-xl border border-border bg-surface p-7 shadow-card sm:p-10">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Une question avant de commencer ?
             </h2>
@@ -203,7 +203,7 @@ export default function HomePage() {
               On répond sur WhatsApp, en français, depuis Niamey.
             </p>
 
-            <dl className="mt-9 grid gap-6 sm:grid-cols-3">
+            <dl className="mt-7 grid gap-6 sm:grid-cols-3">
               {[
                 {
                   terme: "WhatsApp",
