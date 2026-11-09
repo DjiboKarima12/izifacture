@@ -45,21 +45,21 @@ export default function HomePage() {
     <div className="min-h-screen bg-surface">
       {/* ==================================================== Bande sombre */}
       <div className="bg-sidebar text-sidebar-foreground">
-       <header className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 sm:px-6">
-  <Logo onSidebar />
+        <header className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 sm:px-6">
+          <Logo onSidebar />
 
-  <nav className="flex items-center gap-1 sm:gap-2" aria-label="Accès au compte">
-    <Link
-      href="/login"
-      className="rounded-lg px-2 py-1.5 text-xs font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground"
-    >
-      Connexion
-    </Link>
-    <Button asChild size="sm" className="text-xs px-2.5 h-8">
-      <Link href="/signup">S&apos;inscrire</Link>
-    </Button>
-  </nav>
-</header>
+          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Accès au compte">
+            <Link
+              href="/login"
+              className="rounded-lg px-2 py-1.5 text-xs font-medium text-sidebar-muted transition-colors hover:bg-sidebar-active hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Connexion
+            </Link>
+            <Button asChild size="sm" className="h-8 px-2.5 text-xs">
+              <Link href="/signup">S&apos;inscrire</Link>
+            </Button>
+          </nav>
+        </header>
 
         <section className="mx-auto max-w-[1120px] px-4 pb-20 pt-10 sm:px-6 sm:pb-28 sm:pt-16">
           <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -292,45 +292,41 @@ export default function HomePage() {
             </p>
 
             <dl className="mt-9 grid gap-6 sm:grid-cols-3">
-  <div>
-    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      WhatsApp
-    </dt>
-    <dd className="mt-1.5 break-words font-medium">
-      <a 
-        href="https://wa.me/22789353500" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="hover:underline text-foreground transition-colors"
-      >
-        +227 89 35 35 00
-      </a>
-    </dd>
-  </div>
-
-  <div>
-    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      Email
-    </dt>
-    <dd className="mt-1.5 break-words font-medium">
-      <a 
-        href="mailto:barketechnologie@gmail.com"
-        className="hover:underline text-foreground transition-colors"
-      >
-        barketechnologie@gmail.com
-      </a>
-    </dd>
-  </div>
-
-  <div>
-    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      Adresse
-    </dt>
-    <dd className="mt-1.5 break-words font-medium">
-      Niamey, Niger
-    </dd>
-  </div>
-</dl>
+              {[
+                {
+                  terme: "WhatsApp",
+                  valeur: "+227 89 35 35 00",
+                  href: "https://wa.me/22789353500",
+                },
+                {
+                  terme: "Email",
+                  valeur: "barketechnologie@gmail.com",
+                  href: "mailto:barketechnologie@gmail.com",
+                },
+                { terme: "Adresse", valeur: "Niamey, Niger" },
+              ].map((contact) => (
+                <div key={contact.terme}>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {contact.terme}
+                  </dt>
+                  <dd className="mt-1.5 break-words font-medium">
+                    {contact.href ? (
+                      <a
+                        href={contact.href}
+                        {...(contact.href.startsWith("http")
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                        className="rounded-md transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {contact.valeur}
+                      </a>
+                    ) : (
+                      contact.valeur
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </Reveal>
       </section>
