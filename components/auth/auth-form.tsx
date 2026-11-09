@@ -53,18 +53,22 @@ export function AuthForm({
     setNotice(null);
 
     startTransition(async () => {
-      const result = isSignUp ? await signUp(form) : await signIn(form);
+      const result = isSignUp ? await signUp(form, next) : await signIn(form);
 
       if (!result.ok) {
         setError(result.error);
         return;
       }
 
-      // Sans session après inscription, la confirmation par email est activée.
-      if (isSignUp) {
+      // Sans session après inscription, la confirmation par email est activée :
+      // rien à ouvrir tant que le lien n'est pas suivi. C'est lui qui ramène
+      // à la destination voulue.
+      if (result.data?.confirmEmail) {
         setNotice(
-          "Compte créé. Si un email de confirmation vous a été envoyé, suivez le lien avant de vous connecter.",
+          `Compte créé. Ouvrez l'email envoyé à ${form.email} et cliquez sur le lien pour activer votre compte` +
+            (vaPayer ? " : vous arriverez directement au paiement." : "."),
         );
+        return;
       }
       router.push(next ?? "/dashboard");
       router.refresh();

@@ -9,6 +9,8 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { emailSchema } from "@/lib/domain/schemas";
 import { completerIdentifiant } from "@/lib/members";
+import { safeNextPath } from "@/lib/auth/next-path";
+import { siteUrl } from "@/lib/site";
 import type { ActionResult } from "@/lib/actions/invoices";
 
 /**
@@ -73,23 +75,42 @@ export async function signIn(input: unknown): Promise<ActionResult> {
   return { ok: true, data: undefined };
 }
 
-export async function signUp(input: unknown): Promise<ActionResult> {
+/**
+ * `confirmEmail` vrai : la confirmation par email est activée, aucune session
+ * n'existe encore. Le formulaire doit alors dire de suivre le lien reçu, et non
+ * pousser vers une page qui renverrait à la connexion.
+ *
+ * Le lien de confirmation ramène sur `/auth/callback` avec la destination
+ * voulue (`next`) : qui a cliqué « Choisir le Premium » retombe sur le
+ * paiement, pas sur un écran de connexion. Le nom de l'entreprise voyage dans
+ * les métadonnées du compte, pour que le retour du lien crée l'organisation
+ * sans redemander ce qui a déjà été saisi.
+ */
+export async function signUp(
+  input: unknown,
+  next?: string | null,
+): Promise<ActionResult<{ confirmEmail: boolean }>> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
+
+  const destination = safeNextPath(next) ?? "/dashboard";
+  const origin = (await headers()).get("origin");
 
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { data: { full_name: parsed.data.fullName } },
+    options: {
+      data: {
+        full_name: parsed.data.fullName,
+        organization_name: parsed.data.organizationName,
+      },
+      emailRedirectTo: `${siteUrl(origin)}/auth/callback?next=${encodeURIComponent(destination)}`,
+    },
   });
 
   if (error) return { ok: false, error: error.message };
-  if (!data.session) {
-    // Confirmation par email activée : aucune session tant que le lien n'est
-    // pas suivi, donc l'organisation sera créée à la première connexion.
-    return { ok: true, data: undefined };
-  }
+  if (!data.session) return { ok: true, data: { confirmEmail: true } };
 
   // Organisation + appartenance owner en une seule transaction, côté base.
   const { error: orgError } = await supabase.rpc("create_organization", {
@@ -98,7 +119,7 @@ export async function signUp(input: unknown): Promise<ActionResult> {
   if (orgError) return { ok: false, error: orgError.message };
 
   revalidatePath("/", "layout");
-  return { ok: true, data: undefined };
+  return { ok: true, data: { confirmEmail: false } };
 }
 
 export async function signOut(): Promise<never> {
@@ -136,9 +157,7 @@ export async function resetPassword(input: unknown): Promise<ActionResult> {
   const origin = headerList.get("origin") ?? "";
   const supabase = createSupabaseServerClient();
 
-  const redirectToUrl = process.env.NEXT_PUBLIC_SITE_URL 
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`
-    : `${origin || "https://facture.barketechnologie.com"}/auth/callback?next=/reset-password`;
+  const redirectToUrl = `${siteUrl(origin)}/auth/callback?next=/reset-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: redirectToUrl,
