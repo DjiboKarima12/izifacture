@@ -18,9 +18,20 @@ import { signIn, signUp } from "@/lib/actions/auth";
  * disposition doivent rester identiques, sinon les deux écrans divergent au
  * premier ajustement.
  */
-export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+export function AuthForm({
+  mode,
+  next = null,
+}: {
+  mode: "signin" | "signup";
+  /** Destination après succès, déjà vérifiée par `safeNextPath()`. */
+  next?: string | null;
+}) {
   const router = useRouter();
   const isSignUp = mode === "signup";
+  // Le visiteur vient du bouton premium de la vitrine : on le lui rappelle,
+  // sinon le formulaire d'inscription seul laisse croire qu'il s'est trompé.
+  const vaPayer = next?.startsWith("/abonnement") ?? false;
+  const autreEcran = isSignUp ? "/login" : "/signup";
 
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
@@ -55,7 +66,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           "Compte créé. Si un email de confirmation vous a été envoyé, suivez le lien avant de vous connecter.",
         );
       }
-      router.push("/dashboard");
+      router.push(next ?? "/dashboard");
       router.refresh();
     });
   };
@@ -77,6 +88,14 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                 ? "Quelques informations, et vous facturez."
                 : "Accédez à vos factures et à vos clients."}
             </p>
+
+            {vaPayer ? (
+              <p className="mt-4 rounded-lg bg-accent px-3 py-2.5 text-sm text-accent-foreground">
+                <span className="font-semibold">Formule Premium choisie.</span>{" "}
+                {isSignUp ? "Une fois le compte créé" : "Une fois connecté"}, vous passez
+                directement au paiement par Mobile Money.
+              </p>
+            ) : null}
 
             <form onSubmit={submit} className="mt-6 space-y-4">
               {isSignUp ? (
@@ -193,7 +212,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {isSignUp ? "Vous avez déjà un compte ?" : "Pas encore de compte ?"}{" "}
           <Link
-            href={isSignUp ? "/login" : "/signup"}
+            href={next ? `${autreEcran}?next=${encodeURIComponent(next)}` : autreEcran}
             className="font-medium text-interactive underline-offset-4 hover:underline"
           >
             {isSignUp ? "Se connecter" : "Créer un compte"}

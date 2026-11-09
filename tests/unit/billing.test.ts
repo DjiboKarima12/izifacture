@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { subscriptionRequestMessage, subscriptionRequestUrl } from "@/lib/billing";
+import {
+  premiumCheckoutPath,
+  premiumSignupPath,
+  subscriptionRequestMessage,
+  subscriptionRequestUrl,
+} from "@/lib/billing";
+import { safeNextPath } from "@/lib/auth/next-path";
 import { subscriptionRequestSchema } from "@/lib/domain/schemas";
 import { formatAmount } from "@/lib/money";
 
@@ -55,5 +61,30 @@ describe("subscriptionRequestMessage", () => {
     const url = subscriptionRequestUrl({ period: "monthly", country: "NE", phone: "89353500" }, context);
     expect(url.startsWith("https://wa.me/22789353500?text=")).toBe(true);
     expect(decodeURIComponent(url.split("text=")[1] ?? "")).toContain("Mensuel (1 mois)");
+  });
+});
+
+describe("premiumSignupPath", () => {
+  it("mène à l'inscription, puis au paiement de la période choisie", () => {
+    const path = premiumSignupPath("annual");
+    expect(path.startsWith("/signup?next=")).toBe(true);
+    const next = new URLSearchParams(path.split("?")[1]).get("next");
+    expect(next).toBe(premiumCheckoutPath("annual"));
+    expect(safeNextPath(next)).toBe("/abonnement?periode=annual&payer=1");
+  });
+});
+
+describe("safeNextPath", () => {
+  it("accepte un chemin interne", () => {
+    expect(safeNextPath("/dashboard")).toBe("/dashboard");
+  });
+
+  it("refuse toute destination externe ou mal formée", () => {
+    expect(safeNextPath("https://faux-site.example")).toBeNull();
+    expect(safeNextPath("//faux-site.example")).toBeNull();
+    expect(safeNextPath("/\\faux-site.example")).toBeNull();
+    expect(safeNextPath("dashboard")).toBeNull();
+    expect(safeNextPath(["/a", "/b"])).toBeNull();
+    expect(safeNextPath(undefined)).toBeNull();
   });
 });

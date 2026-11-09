@@ -9,6 +9,7 @@ import { getSession } from "@/lib/auth/session";
 import { repositories } from "@/lib/data";
 import { formatDateLong, toIsoDate } from "@/lib/dates";
 import { monthBounds, planOf, quotaState } from "@/lib/plan";
+import type { BillingPeriod } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Abonnement" };
 
@@ -19,7 +20,12 @@ export const metadata: Metadata = { title: "Abonnement" };
  * barrière d'émission : un abonnement activé à la main se voit au rechargement,
  * sans reconnexion.
  */
-export default async function AbonnementPage() {
+export default async function AbonnementPage({
+  searchParams,
+}: {
+  searchParams: { periode?: string | string[]; payer?: string | string[] };
+}) {
+  const initialPeriod: BillingPeriod = searchParams.periode === "annual" ? "annual" : "monthly";
   const session = await getSession();
   const { from, to } = monthBounds();
 
@@ -85,6 +91,8 @@ export default async function AbonnementPage() {
         <SubscribePanel
           context={{ orgId: session.orgId, orgName: session.organization.name }}
           isRenewal={plan === "premium"}
+          initialPeriod={initialPeriod}
+          openPayment={searchParams.payer === "1"}
         />
       </div>
     </PageShell>

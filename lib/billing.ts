@@ -50,6 +50,19 @@ export function normalizePhoneDigits(raw: string): string {
   return raw.replace(/\D/g, "");
 }
 
+/**
+ * Page d'abonnement avec la fenêtre de paiement déjà ouverte sur la période
+ * choisie : c'est là qu'arrive le visiteur qui a cliqué sur le premium.
+ */
+export function premiumCheckoutPath(period: BillingPeriod): string {
+  return `/abonnement?periode=${period}&payer=1`;
+}
+
+/** Inscription, puis paiement : le bouton premium de la vitrine. */
+export function premiumSignupPath(period: BillingPeriod): string {
+  return `/signup?next=${encodeURIComponent(premiumCheckoutPath(period))}`;
+}
+
 export type SubscriptionRequest = {
   period: BillingPeriod;
   country: string;

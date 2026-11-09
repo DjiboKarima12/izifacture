@@ -53,12 +53,18 @@ const AVANTAGES = [
 export function SubscribePanel({
   context,
   isRenewal,
+  initialPeriod = "monthly",
+  openPayment = false,
 }: {
   context: SubscriptionRequestContext;
   /** Déjà premium : on prolonge plutôt qu'on ne souscrit. */
   isRenewal: boolean;
+  /** Période choisie sur la vitrine, reprise ici. */
+  initialPeriod?: BillingPeriod;
+  /** Arrivée depuis le bouton premium : la fenêtre de paiement s'ouvre d'emblée. */
+  openPayment?: boolean;
 }) {
-  const [periode, setPeriode] = React.useState<BillingPeriod>("monthly");
+  const [periode, setPeriode] = React.useState<BillingPeriod>(initialPeriod);
   const montant = premiumPrice(periode);
 
   return (
@@ -99,7 +105,7 @@ export function SubscribePanel({
               : "pour 1 mois"}
           </p>
 
-          <PaiementMobileMoney periode={periode} context={context} />
+          <PaiementMobileMoney periode={periode} context={context} defaultOpen={openPayment} />
         </div>
       </div>
     </Card>
@@ -111,11 +117,13 @@ type Erreurs = Partial<Record<"country" | "phone", string>>;
 function PaiementMobileMoney({
   periode,
   context,
+  defaultOpen,
 }: {
   periode: BillingPeriod;
   context: SubscriptionRequestContext;
+  defaultOpen: boolean;
 }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(defaultOpen);
   const [country, setCountry] = React.useState(MOBILE_MONEY_COUNTRIES[0]?.code ?? "NE");
   const [phone, setPhone] = React.useState("");
   const [erreurs, setErreurs] = React.useState<Erreurs>({});

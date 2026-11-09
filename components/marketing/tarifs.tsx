@@ -6,6 +6,7 @@ import { Check, Sparkles } from "lucide-react";
 
 import { Reveal } from "@/components/marketing/reveal";
 import { Button } from "@/components/ui/button";
+import { premiumSignupPath } from "@/lib/billing";
 import { FREE_MONTHLY_QUOTA } from "@/lib/plan";
 import {
   ANNUAL_MONTHS_FREE,
@@ -104,7 +105,7 @@ export function Tarifs() {
               size="lg"
               className="mt-9 w-full rounded-full bg-sidebar-mark text-sidebar-mark-foreground hover:bg-sidebar-mark/90 focus-visible:ring-offset-sidebar"
             >
-              <Link href="/signup">Créer mon compte</Link>
+              <Link href={premiumSignupPath(periode)}>Choisir le Premium</Link>
             </Button>
           </div>
         </Reveal>
