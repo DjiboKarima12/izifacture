@@ -143,7 +143,7 @@ Deux tâches `crontab` y tournent :
 
 Variables propres au serveur, dans `.env` : `RESEND_API_KEY`, `EMAIL_FROM` (domaine
 `barketechnologie.com`, vérifié chez Resend), `CRON_SECRET`. Collées depuis Windows, les lignes
-portent un `` final : toute commande shell qui les relit passe par `tr -d ''`.
+portent un `\r` final : toute commande shell qui les relit passe par `tr -d '\r'`.
 
 ### Ce qui reste fermé
 
