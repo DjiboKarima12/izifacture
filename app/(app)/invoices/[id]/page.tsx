@@ -196,7 +196,10 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         {receipt}
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-3 print:hidden">
+      {/* `min-w-0` : un élément de grille s'élargit par défaut à la largeur de
+          son contenu — le tableau des lignes poussait la carte hors de l'écran
+          du téléphone au lieu de défiler à l'intérieur. */}
+      <div className="mt-5 grid gap-4 lg:grid-cols-3 print:hidden [&>*]:min-w-0">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-4">
             <h2 className="text-base font-semibold">Lignes</h2>

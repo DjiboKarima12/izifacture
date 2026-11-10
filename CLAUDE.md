@@ -128,6 +128,23 @@ l'utilisateur. Il n'est **pas** consultable depuis le tableau de bord Supabase :
 le réinitialiser. L'application, elle, ne s'en sert jamais — elle passe entièrement par l'API REST
 avec les clés `anon` et `service_role`.
 
+### Exploitation (VPS Hostinger)
+
+Mise en ligne après un push sur `main`, dans `/var/www/izifacture` :
+`git pull && npm run build && pm2 restart all` — **sans le redémarrage, rien ne change en ligne**.
+
+Deux tâches `crontab` y tournent :
+
+- **2 h 30** — `node scripts/backup.mjs` : export de toutes les tables, 14 jours gardés
+  (`/var/backups/izifacture/`). L'offre gratuite de Supabase n'a aucune sauvegarde. Cf.
+  [`docs/sauvegarde.md`](docs/sauvegarde.md).
+- **7 h** — `curl` sur `/api/cron/reminders` avec `CRON_SECRET` : emails de bienvenue, d'approche
+  et de fin d'essai ou de Premium (`lib/email/reminders.ts`), envoyés par Resend.
+
+Variables propres au serveur, dans `.env` : `RESEND_API_KEY`, `EMAIL_FROM` (domaine
+`barketechnologie.com`, vérifié chez Resend), `CRON_SECRET`. Collées depuis Windows, les lignes
+portent un `` final : toute commande shell qui les relit passe par `tr -d ''`.
+
 ### Ce qui reste fermé
 
 L'API de gestion (`POST /v1/projects/{ref}/database/migrations`) renverrait la version appliquée

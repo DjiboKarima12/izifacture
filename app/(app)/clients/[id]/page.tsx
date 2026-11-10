@@ -69,7 +69,9 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         <ClientDetailActions client={client} invoiceCount={documents.length} />
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+      {/* `min-w-0` : sans lui, le tableau des documents élargit la grille et
+          pousse les cartes hors de l'écran du téléphone. */}
+      <div className="mt-5 grid gap-4 lg:grid-cols-3 [&>*]:min-w-0">
         <div className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
