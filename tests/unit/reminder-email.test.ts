@@ -12,19 +12,47 @@ const base = {
 const free = { plan: "free", status: "active", currentPeriodEnd: null };
 const premium = { plan: "premium", status: "active", currentPeriodEnd: "2027-01-10T00:00:00Z" };
 
+/** Ce que renvoie le cron s'il tourne chaque jour à 7 h, du `debut` au `fin` inclus. */
+function calendrier(target: Parameters<typeof dueReminder>[0], debut: string, fin: string) {
+  const envois: string[] = [];
+  for (let t = Date.parse(debut); t <= Date.parse(fin); t += 86_400_000) {
+    const r = dueReminder(target, new Date(t));
+    if (r) envois.push(`${new Date(t).toISOString().slice(0, 10)} ${r.kind}`);
+  }
+  return envois;
+}
+
 describe("dueReminder", () => {
-  it("écrit une seule fois pour l'essai, à trois jours de la fin", () => {
-    const target = { ...base, subscription: free };
-    expect(dueReminder(target, new Date("2026-12-12T11:00:00Z"))).toBeNull();
-    expect(dueReminder(target, new Date("2026-12-13T11:00:00Z"))?.daysLeft).toBe(3);
-    expect(dueReminder(target, new Date("2026-12-14T11:00:00Z"))).toBeNull();
+  it("essai : bienvenue, J-3, fin — une fois chacun", () => {
+    expect(calendrier({ ...base, subscription: free }, "2026-12-01T07:00:00Z", "2026-12-25T07:00:00Z")).toEqual([
+      "2026-12-02 welcome",
+      "2026-12-14 trial-soon",
+      "2026-12-17 trial-ended",
+    ]);
   });
 
-  it("écrit une seule fois pour le Premium, à cinq jours de la fin", () => {
+  it("Premium : J-5, veille, expiration — une fois chacun", () => {
+    const target = { ...base, orgCreatedAt: "2026-01-01T10:00:00Z", subscription: premium };
+    expect(calendrier(target, "2026-12-30T07:00:00Z", "2027-01-20T07:00:00Z")).toEqual([
+      "2027-01-05 premium-soon",
+      "2027-01-09 premium-last",
+      "2027-01-10 premium-ended",
+    ]);
+  });
+
+  it("n'annonce pas la fin de l'essai à un abonné Premium", () => {
     const target = { ...base, subscription: premium };
-    expect(dueReminder(target, new Date("2027-01-04T06:00:00Z"))).toBeNull();
-    expect(dueReminder(target, new Date("2027-01-05T06:00:00Z"))?.kind).toBe("premium");
-    expect(dueReminder(target, new Date("2027-01-06T06:00:00Z"))).toBeNull();
+    const envois = calendrier(target, "2026-12-03T07:00:00Z", "2026-12-25T07:00:00Z");
+    expect(envois.some((e) => e.includes("trial"))).toBe(false);
+  });
+
+  it("ne relance pas un Premium sans échéance", () => {
+    const target = {
+      ...base,
+      orgCreatedAt: "2026-01-01T10:00:00Z",
+      subscription: { plan: "premium", status: "active", currentPeriodEnd: null },
+    };
+    expect(calendrier(target, "2026-12-01T07:00:00Z", "2027-02-01T07:00:00Z")).toEqual([]);
   });
 });
 
@@ -38,5 +66,13 @@ describe("reminderEmail", () => {
     expect(email.html).toContain("https://site.test/abonnement?payer=1");
     expect(email.html).toContain("Boutique &lt;Awa&gt;");
     expect(email.html).not.toContain("<Awa>");
+  });
+
+  it("souhaite la bienvenue avec un lien vers la première facture", () => {
+    const target = { ...base, subscription: free };
+    const reminder = dueReminder(target, new Date("2026-12-02T07:00:00Z"))!;
+    const email = reminderEmail(target, reminder, "https://site.test");
+    expect(email.subject).toBe("Bienvenue sur MaMaFacture");
+    expect(email.html).toContain("https://site.test/invoices/new");
   });
 });
