@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PlanReminderBanner } from "@/components/billing/plan-reminder-banner";
 import { TrialEndedDialog } from "@/components/billing/trial-ended-dialog";
 import { Logo } from "@/components/layout/logo";
+import { NewsDialog } from "@/components/layout/news-dialog";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { PlanBadge } from "@/components/layout/plan-badge";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -64,9 +65,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {reminder ? <PlanReminderBanner reminder={reminder} /> : null}
         {children}
       </div>
+      {/* Une seule fenêtre à l'entrée : la fin d'essai prime sur les nouveautés,
+          qui attendront la prochaine visite. */}
       {termine ? (
         <TrialEndedDialog reason={subscription.plan === "premium" ? "premium" : "trial"} />
-      ) : null}
+      ) : (
+        <NewsDialog orgCreatedAt={session.organization.createdAt} />
+      )}
     </div>
   );
 }

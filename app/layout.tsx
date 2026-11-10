@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Atkinson_Hyperlegible, Inter, Outfit, Source_Serif_4 } from "next/font/google";
 import { InstallPrompt } from "@/components/layout/install-prompt";
+import { UpdateBanner } from "@/components/layout/update-banner";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -117,6 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans">
         {children}
         <InstallPrompt />
+        <UpdateBanner />
       </body>
     </html>
   );
