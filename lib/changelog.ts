@@ -33,6 +33,7 @@ export const CHANGELOG: NewsEntry[] = [
     items: [
       { text: "Sur une facture, le bouton WhatsApp prépare le message avec le montant et un lien : votre client ouvre sa facture sans créer de compte." },
       { text: "Une facture pas encore réglée ? Le bouton Relancer envoie un rappel poli avec le reste à payer." },
+      { text: "Pour votre comptable : exportez les factures et les encaissements du mois en fichier Excel." },
       {
         text: "Installez MaMaFacture sur votre ordinateur : elle s'ouvre d'un clic et demande toujours votre mot de passe.",
         unlessInstalled: true,
