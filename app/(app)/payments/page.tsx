@@ -80,7 +80,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
       <Card className="mt-5">
         <CardContent className="p-4">
           <form action="/payments" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <Field label="Facture ou client" htmlFor="filter-q" className="lg:col-span-2">
+            <Field label="Facture ou client" htmlFor="filter-q" className="lg:col-span-3">
               <div className="relative">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -149,12 +149,16 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
               </Field>
             </div>
 
-            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-6">
-              <Button type="submit" size="sm">
+            {/* Deux lignes pleines sur grand écran : recherche, moyen, dates, puis
+                montants et bouton — sans quoi « Montant max. » et « Filtrer »
+                tombaient seuls chacun sur leur ligne. */}
+            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+              {/* Taille `md` : même hauteur que les champs voisins. */}
+              <Button type="submit" size="md">
                 Filtrer
               </Button>
               {hasFilters ? (
-                <Button asChild variant="ghost" size="sm">
+                <Button asChild variant="ghost" size="md">
                   <Link href="/payments">
                     <X aria-hidden />
                     Effacer

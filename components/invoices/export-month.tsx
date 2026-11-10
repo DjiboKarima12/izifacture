@@ -19,7 +19,7 @@ export function ExportMonth({ kind }: { kind: "factures" | "encaissements" }) {
         type="month"
         name="mois"
         defaultValue={todayIso().slice(0, 7)}
-        className="h-9 w-[150px]"
+        className="h-9 w-[184px]"
       />
       <Button type="submit" variant="outline" size="sm">
         <FileSpreadsheet aria-hidden />
