@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileText, Plus, Search } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { ExportMonth } from "@/components/invoices/export-month";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,12 +54,15 @@ export default async function InvoicesPage({
         title="Factures"
         description={`${total} facture${total > 1 ? "s" : ""}`}
         actions={
-          <Button asChild>
-            <Link href="/invoices/new">
-              <Plus aria-hidden />
-              Nouvelle facture
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportMonth kind="factures" />
+            <Button asChild>
+              <Link href="/invoices/new">
+                <Plus aria-hidden />
+                Nouvelle facture
+              </Link>
+            </Button>
+          </div>
         }
       />
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Search, Wallet, X } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { ExportMonth } from "@/components/invoices/export-month";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,6 +69,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
       <PageHeader
         title="Encaissements"
         description={`${formatAmount(totalAmount, currency)} sur ${total} mouvement${total > 1 ? "s" : ""}${hasFilters ? " (filtrés)" : ""}`}
+        actions={<ExportMonth kind="encaissements" />}
       />
 
       {/*
