@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -24,6 +25,14 @@ import { repositories } from "@/lib/data";
 import { formatAmount, formatQuantity } from "@/lib/money";
 import { formatDate, formatDateLong } from "@/lib/dates";
 import { deriveDisplayStatus } from "@/lib/status";
+import {
+  publicDocumentUrl,
+  reminderMessage,
+  shareMessage,
+  whatsappPhone,
+  whatsappUrl,
+} from "@/lib/share";
+import { siteUrl } from "@/lib/site";
 import { amountDue } from "@/lib/tax";
 export const metadata: Metadata = { title: "Facture" };
 
@@ -57,6 +66,39 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
     bucket.base += item.lineSubtotal;
     bucket.tax += item.lineTax;
     taxBuckets.set(item.taxRate, bucket);
+  }
+
+  /**
+   * Envoi et relance par WhatsApp. Un brouillon n'a ni numéro ni lien public
+   * (le dépôt le refuse) : rien à partager. La relance n'existe que pour une
+   * facture émise dont il reste quelque chose à encaisser.
+   */
+  const displayStatus = deriveDisplayStatus(invoice);
+  let share: { sendUrl: string; reminderUrl: string | null } | null = null;
+  if (invoice.status !== "draft" && invoice.number) {
+    const host = headers().get("host");
+    const origin = host ? `${host.startsWith("localhost") ? "http" : "https"}://${host}` : null;
+    const doc = {
+      type: invoice.type,
+      number: invoice.number,
+      total: invoice.total,
+      remaining,
+      currency,
+      clientName: client?.name ?? null,
+      issuerName: issuer.name,
+      url: publicDocumentUrl(siteUrl(origin), invoice.publicToken),
+    };
+    const phone = whatsappPhone(client?.phone, client?.country, issuer.country);
+    const relancable =
+      invoice.type === "invoice" &&
+      remaining > 0 &&
+      (invoice.status === "sent" || invoice.status === "partially_paid");
+    share = {
+      sendUrl: whatsappUrl(phone, shareMessage(doc)),
+      reminderUrl: relancable
+        ? whatsappUrl(phone, reminderMessage({ ...doc, overdue: displayStatus === "overdue" }))
+        : null,
+    };
   }
 
   const storedTotals = {
@@ -118,7 +160,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             <h1 className="tabular text-xl font-bold tracking-tight">
               {invoice.number ?? "Brouillon"}
             </h1>
-            <StatusBadge status={deriveDisplayStatus(invoice)} />
+            <StatusBadge status={displayStatus} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {client?.name ?? "—"} · émise le {formatDateLong(invoice.issueDate)}
@@ -132,6 +174,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           status={invoice.status}
           remaining={remaining}
           currency={currency}
+          share={share}
         />
       </div>
 

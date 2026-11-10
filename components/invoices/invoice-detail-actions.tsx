@@ -11,8 +11,10 @@ import {
   Download,
   FileMinus,
   FileOutput,
+  MessageCircle,
   Pencil,
   Send,
+  BellRing,
   Trash2,
   Wallet,
 } from "lucide-react";
@@ -49,6 +51,7 @@ export function InvoiceDetailActions({
   status,
   remaining,
   currency,
+  share = null,
   className,
 }: {
   invoiceId: string;
@@ -56,6 +59,12 @@ export function InvoiceDetailActions({
   status: InvoiceStatus;
   remaining: number;
   currency: Currency;
+  /**
+   * Liens WhatsApp préparés par la page (numéro, message, lien public), ou
+   * `null` pour un brouillon : il n'a pas de numéro et n'a jamais été envoyé.
+   * `reminderUrl` n'existe que s'il reste à encaisser.
+   */
+  share?: { sendUrl: string; reminderUrl: string | null } | null;
   className?: string;
 }) {
   const router = useRouter();
@@ -203,6 +212,28 @@ export function InvoiceDetailActions({
             Télécharger
           </a>
         </Button>
+
+        {/*
+          WhatsApp s'ouvre avec le message prêt ; c'est le commerçant qui
+          appuie sur Envoyer. Nouvel onglet : la facture reste ouverte ici.
+        */}
+        {share ? (
+          <Button asChild variant="outline" size="sm">
+            <a href={share.sendUrl} target="_blank" rel="noopener noreferrer">
+              <MessageCircle aria-hidden />
+              WhatsApp
+            </a>
+          </Button>
+        ) : null}
+
+        {share?.reminderUrl ? (
+          <Button asChild variant="outline" size="sm">
+            <a href={share.reminderUrl} target="_blank" rel="noopener noreferrer">
+              <BellRing aria-hidden />
+              Relancer
+            </a>
+          </Button>
+        ) : null}
 
         {/*
           Un seul dialogue, deux commandes : le bouton ci-dessous et l'entrée

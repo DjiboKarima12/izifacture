@@ -27,6 +27,19 @@ export type NewsEntry = {
 
 export const CHANGELOG: NewsEntry[] = [
   {
+    id: "2026-11-10b",
+    date: "2026-11-10T12:00:00Z",
+    title: "Envoyez vos factures par WhatsApp",
+    items: [
+      { text: "Sur une facture, le bouton WhatsApp prépare le message avec le montant et un lien : votre client ouvre sa facture sans créer de compte." },
+      { text: "Une facture pas encore réglée ? Le bouton Relancer envoie un rappel poli avec le reste à payer." },
+      {
+        text: "Installez MaMaFacture sur votre ordinateur : elle s'ouvre d'un clic et demande toujours votre mot de passe.",
+        unlessInstalled: true,
+      },
+    ],
+  },
+  {
     id: "2026-11-10",
     date: "2026-11-10T00:00:00Z",
     title: "MaMaFacture s'installe sur votre ordinateur",

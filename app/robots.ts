@@ -25,6 +25,7 @@ export default function robots(): MetadataRoute.Robots {
         "/onboarding",
         "/auth",
         "/reset-password",
+        "/f/",
         "/forgot-password",
       ],
     },
