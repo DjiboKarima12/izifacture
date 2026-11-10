@@ -82,7 +82,10 @@ export function InstallPrompt() {
     <div
       role="dialog"
       aria-label="Installer MaMaFacture"
-      className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-raised animate-fade-in sm:left-auto sm:right-6 sm:w-[380px] print:hidden"
+      // Masquée derrière une fenêtre modale (nouveautés, fin d'essai) : Radix
+      // pose `data-scroll-locked` sur <body> tant qu'elle est ouverte. Deux
+      // invitations à la fois, c'est une de trop.
+      className="fixed inset-x-4 bottom-4 z-50 overflow-hidden [body[data-scroll-locked]_&]:hidden rounded-xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-raised animate-fade-in sm:left-auto sm:right-6 sm:w-[380px] print:hidden"
     >
       <button
         type="button"

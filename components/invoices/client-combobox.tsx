@@ -88,6 +88,7 @@ export function ClientCombobox({ id, clients, value, onChange, disabled }: Clien
           type="button"
           role="combobox"
           aria-expanded={open}
+          aria-controls={`${id}-liste`}
           disabled={disabled || isPending}
           className={cn(
             bareInputClasses,
@@ -102,6 +103,7 @@ export function ClientCombobox({ id, clients, value, onChange, disabled }: Clien
 
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
+          id={`${id}-liste`}
           align="start"
           sideOffset={6}
           className="z-50 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-raised animate-fade-in"
