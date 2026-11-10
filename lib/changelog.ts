@@ -1,10 +1,20 @@
 /**
- * Nouveautés annoncées aux utilisateurs, de la plus récente à la plus ancienne.
+ * Nouveautés annoncées aux abonnés Premium, de la plus récente à la plus
+ * ancienne.
  *
  * POUR ANNONCER UNE NOUVEAUTÉ : ajouter une entrée EN TÊTE, avec un `id` neuf
  * (la date suffit). La fenêtre s'ouvre une fois, à la prochaine entrée dans
- * l'application, chez ceux qui ne l'ont pas encore vue.
+ * l'application, chez les abonnés qui ne l'ont pas encore vue.
+ *
+ * Ce qui se signale de soi-même au bon moment — le rappel de fin d'abonnement,
+ * par exemple — n'a pas sa place ici : on n'annonce pas un message par un autre.
  */
+
+export type NewsItem = {
+  text: string;
+  /** À taire chez qui a déjà installé l'application : ce serait lui proposer ce qu'il a. */
+  unlessInstalled?: boolean;
+};
 
 export type NewsEntry = {
   /** Identifiant unique ; la date du jour, suffixée au besoin (« 2026-11-10b »). */
@@ -12,7 +22,7 @@ export type NewsEntry = {
   /** Date de publication, ISO. Ne s'annonce qu'aux comptes créés AVANT. */
   date: string;
   title: string;
-  items: string[];
+  items: NewsItem[];
 };
 
 export const CHANGELOG: NewsEntry[] = [
@@ -21,29 +31,45 @@ export const CHANGELOG: NewsEntry[] = [
     date: "2026-11-10T00:00:00Z",
     title: "MaMaFacture s'installe sur votre ordinateur",
     items: [
-      "Installez l'application sur votre bureau ou votre téléphone : elle s'ouvre d'un clic, dans sa propre fenêtre, et demande toujours votre mot de passe.",
-      "Un rappel s'affiche quelques jours avant la fin de votre essai ou de votre abonnement.",
-      "Passez au Premium depuis la page Abonnement, et payez par Mobile Money.",
+      {
+        text: "Installez l'application sur votre bureau ou votre téléphone : elle s'ouvre d'un clic, dans sa propre fenêtre, et demande toujours votre mot de passe.",
+        unlessInstalled: true,
+      },
     ],
   },
 ];
 
+export type NewsReader = {
+  premium: boolean;
+  /** L'application tourne installée, ou ce navigateur l'a installée. */
+  installed: boolean;
+};
+
 /**
  * La nouveauté à montrer, ou `null`.
  *
- * Seulement la PLUS RÉCENTE : après une longue absence, on n'empile pas cinq
- * fenêtres. Et seulement aux comptes créés avant sa publication — un inscrit
- * du jour découvre l'application telle qu'elle est, sans « nouveauté » à
- * comparer à rien.
+ *  - Réservée au PREMIUM : c'est l'abonnement qui donne droit aux évolutions.
+ *  - Seulement la PLUS RÉCENTE : après une longue absence, on n'empile pas cinq
+ *    fenêtres.
+ *  - Seulement aux comptes créés avant sa publication : un inscrit du jour
+ *    découvre l'application telle qu'elle est.
+ *  - Les lignes qui ne concernent pas le lecteur sont retirées ; s'il n'en
+ *    reste aucune, rien ne s'ouvre.
  */
 export function pendingNews(
   lastSeenId: string | null,
   orgCreatedAt: string,
+  reader: NewsReader,
   changelog: NewsEntry[] = CHANGELOG,
 ): NewsEntry | null {
+  if (!reader.premium) return null;
+
   const latest = changelog[0];
   if (!latest || latest.id === lastSeenId) return null;
+
   const created = Date.parse(orgCreatedAt);
   if (Number.isNaN(created) || created >= Date.parse(latest.date)) return null;
-  return latest;
+
+  const items = latest.items.filter((item) => !(item.unlessInstalled && reader.installed));
+  return items.length > 0 ? { ...latest, items } : null;
 }

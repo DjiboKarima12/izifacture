@@ -4,6 +4,7 @@ import * as React from "react";
 import { Download, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { isInstalled, rememberInstalled } from "@/lib/install-state";
 
 /**
  * Propose d'installer MaMaFacture sur l'ordinateur ou le téléphone.
@@ -44,9 +45,12 @@ export function InstallPrompt() {
       // Sans `preventDefault`, Chrome affiche sa propre mini-barre et
       // l'événement ne peut plus être rejoué depuis notre bouton.
       event.preventDefault();
-      if (!recemmentRefuse()) setEvenement(event as InstallEvent);
+      if (!recemmentRefuse() && !isInstalled()) setEvenement(event as InstallEvent);
     };
-    const surInstalle = () => setEvenement(null);
+    const surInstalle = () => {
+      rememberInstalled();
+      setEvenement(null);
+    };
 
     window.addEventListener("beforeinstallprompt", surInstallable);
     window.addEventListener("appinstalled", surInstalle);

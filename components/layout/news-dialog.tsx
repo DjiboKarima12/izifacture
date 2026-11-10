@@ -6,10 +6,12 @@ import { Check, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { pendingNews, type NewsEntry } from "@/lib/changelog";
+import { isInstalled } from "@/lib/install-state";
 
 /**
  * « Quoi de neuf » : s'ouvre une fois après une mise à jour annoncée dans
- * `lib/changelog.ts`, puis plus jamais pour cette annonce.
+ * `lib/changelog.ts`, puis plus jamais pour cette annonce. Réservée aux
+ * abonnés Premium — les règles sont dans `pendingNews()`.
  *
  * Ce qui a été vu est retenu dans `localStorage`, donc par navigateur : un
  * commerçant qui l'a lu au bureau la reverra une fois sur son téléphone. C'est
@@ -19,16 +21,18 @@ import { pendingNews, type NewsEntry } from "@/lib/changelog";
 
 const CLE = "mamafacture-news-seen";
 
-export function NewsDialog({ orgCreatedAt }: { orgCreatedAt: string }) {
+export function NewsDialog({ orgCreatedAt, premium }: { orgCreatedAt: string; premium: boolean }) {
   const [entry, setEntry] = React.useState<NewsEntry | null>(null);
 
   React.useEffect(() => {
     try {
-      setEntry(pendingNews(localStorage.getItem(CLE), orgCreatedAt));
+      setEntry(
+        pendingNews(localStorage.getItem(CLE), orgCreatedAt, { premium, installed: isInstalled() }),
+      );
     } catch {
       setEntry(null);
     }
-  }, [orgCreatedAt]);
+  }, [orgCreatedAt, premium]);
 
   if (!entry) return null;
 
@@ -68,14 +72,14 @@ export function NewsDialog({ orgCreatedAt }: { orgCreatedAt: string }) {
             </Dialog.Description>
             <ul className="space-y-3 text-sm">
               {entry.items.map((item) => (
-                <li key={item} className="flex items-start gap-3">
+                <li key={item.text} className="flex items-start gap-3">
                   <span
                     className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
                     aria-hidden
                   >
                     <Check className="size-3" strokeWidth={3} />
                   </span>
-                  {item}
+                  {item.text}
                 </li>
               ))}
             </ul>

@@ -70,7 +70,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {termine ? (
         <TrialEndedDialog reason={subscription.plan === "premium" ? "premium" : "trial"} />
       ) : (
-        <NewsDialog orgCreatedAt={session.organization.createdAt} />
+        <NewsDialog orgCreatedAt={session.organization.createdAt} premium={plan === "premium"} />
       )}
     </div>
   );
