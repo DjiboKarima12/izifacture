@@ -201,6 +201,11 @@ const organizations: OrganizationRepo = {
     return getMockDb().members.filter((member) => member.orgId === orgId);
   },
 
+  async listForReminders() {
+    // Le jeu de démonstration n'a pas de vrais propriétaires à prévenir.
+    return [];
+  },
+
   async getSubscription(orgId) {
     // Pas de ligne = plan gratuit, jamais une erreur : une organisation dont
     // l'abonnement n'a pas encore été créé doit pouvoir utiliser l'application.

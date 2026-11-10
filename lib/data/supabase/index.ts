@@ -218,6 +218,57 @@ const organizations: OrganizationRepo = {
     }));
   },
 
+  async listForReminders() {
+    const admin = createSupabaseAdminClient();
+    const [orgs, subs, owners, profiles] = await Promise.all([
+      admin.from("organizations").select("id, name, created_at"),
+      admin.from("subscriptions").select("org_id, plan, status, current_period_end"),
+      admin.from("memberships").select("org_id, user_id").eq("role", "owner"),
+      admin.from("profiles").select("id, full_name"),
+    ]);
+    for (const result of [orgs, subs, owners, profiles]) {
+      if (result.error) raise(result.error, "lecture pour les rappels");
+    }
+
+    // Les emails : une page de 1 000 comptes suffit largement aujourd'hui ;
+    // on lit les pages suivantes tant qu'elles sont pleines.
+    const emails = new Map<string, string>();
+    for (let page = 1; ; page += 1) {
+      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) throw new Error(`Lecture des comptes : ${error.message}`);
+      for (const user of data.users) if (user.email) emails.set(user.id, user.email);
+      if (data.users.length < 1000) break;
+    }
+
+    const subByOrg = new Map(
+      ((subs.data ?? []) as Array<{ org_id: string; plan: string; status: string; current_period_end: string | null }>).map(
+        (row) => [row.org_id, { plan: row.plan, status: row.status, currentPeriodEnd: row.current_period_end }],
+      ),
+    );
+    const ownerByOrg = new Map(
+      ((owners.data ?? []) as Array<{ org_id: string; user_id: string }>).map((row) => [row.org_id, row.user_id]),
+    );
+    const names = new Map(
+      ((profiles.data ?? []) as Array<{ id: string; full_name: string | null }>).map((row) => [row.id, row.full_name]),
+    );
+
+    return ((orgs.data ?? []) as Array<{ id: string; name: string; created_at: string }>).flatMap((org) => {
+      const ownerId = ownerByOrg.get(org.id);
+      const email = ownerId ? emails.get(ownerId) : undefined;
+      if (!ownerId || !email) return [];
+      return [
+        {
+          orgId: org.id,
+          orgName: org.name,
+          orgCreatedAt: org.created_at,
+          subscription: subByOrg.get(org.id) ?? { plan: "free", status: "active", currentPeriodEnd: null },
+          ownerEmail: email,
+          ownerName: names.get(ownerId) ?? null,
+        },
+      ];
+    });
+  },
+
   async getSubscription(orgId) {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase

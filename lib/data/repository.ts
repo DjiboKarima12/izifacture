@@ -117,7 +117,26 @@ export interface OrganizationRepo {
    * comme gratuite plutôt que comme une erreur.
    */
   getSubscription(orgId: UUID): Promise<SubscriptionInfo>;
+
+  /**
+   * TOUTES les organisations, avec abonnement et propriétaire — pour les
+   * rappels par email envoyés par la tâche planifiée.
+   *
+   * Traverse les organisations : réservé à cette tâche, qui s'authentifie par
+   * `CRON_SECRET`, jamais à une page. L'email du propriétaire vit dans
+   * `auth.users` et ne se lit qu'avec la clé de service.
+   */
+  listForReminders(): Promise<ReminderTarget[]>;
 }
+
+export type ReminderTarget = {
+  orgId: UUID;
+  orgName: string;
+  orgCreatedAt: string;
+  subscription: SubscriptionInfo;
+  ownerEmail: string;
+  ownerName: string | null;
+};
 
 export interface ClientRepo {
   list(orgId: UUID, filters?: ClientListFilters): Promise<Paginated<Client>>;
